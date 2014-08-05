@@ -129,6 +129,8 @@ class VSpace1:
             self.out_data['losses'].append(curr_loss)
             print curr_loss
 
+        self.out_data['data'] = self.training_dialogs
+
     def learning_iter(self, learning_rate, rprop):
         # Prepare accumulators for gradient.
         accum_loss_grad = []
@@ -274,7 +276,7 @@ class Tracker:
 
 def main():
     # Commit code to git.
-    repo = pygit2.Repository(".git")
+    repo = pygit2.Repository(".")
     index = repo.index
     index.read()
     index.add("vspace1.py")
