@@ -27,7 +27,7 @@ def rand(*args):
 
 
 class VSpace1:
-    dialog_cnt = 10
+    dialog_cnt = 1000
     lat_dims = 2
     proj_dims = 3
     learning_iters = 300
