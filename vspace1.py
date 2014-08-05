@@ -30,7 +30,7 @@ class VSpace1:
     dialog_cnt = 10
     lat_dims = 2
     proj_dims = 3
-    learning_iters = 1000
+    learning_iters = 100
     learning_rate = 0.1
     rprop_plus = 1.2
     rprop_minus = 0.5
@@ -280,9 +280,13 @@ def main():
     index.add("vspace1.py")
     tree = index.write_tree()
 
+    head = repo.lookup_reference('HEAD')
+    head = head.resolve()
+
+
     author = pygit2.Signature('autogit', 'autogit@zilka.me')
     repo.create_commit('refs/heads/master', author, author, 'automatic',
-            tree, [])
+            tree, [head.target])
 
     env = Environment(loader=FileSystemLoader('tpl'))
     env.globals.update(zip=zip)
