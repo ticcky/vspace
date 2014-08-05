@@ -305,8 +305,8 @@ def main():
     vs = VSpace1()
     try:
         vs.learn()
-    except:
-        pass
+    except KeyboardInterrupt:
+        print 'OK interrupting'
 
     tracker = Tracker(vs.model)
     tracker.simulate(vs.training_dialogs)
