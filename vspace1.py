@@ -273,13 +273,14 @@ class Tracker:
         self.out_data['confusion_tables'] = ct
 
 
-
-def main():
+def git_commit():
     # Commit code to git.
     repo = pygit2.Repository(".")
     index = repo.index
     index.read()
     index.add("vspace1.py")
+    index.add("generator.py")
+    index.add("out/training.html")
     index.write()
     tree = index.write_tree()
 
@@ -290,7 +291,8 @@ def main():
     repo.create_commit('refs/heads/master', author, author, 'automatic',
             tree, [head.target])
 
-    return
+def main():
+    git_commit()
 
     env = Environment(loader=FileSystemLoader('tpl'))
     env.globals.update(zip=zip)
@@ -309,6 +311,8 @@ def main():
     with open("out/training.html", "w") as f_out:
         f_out.write(tpl.render(tracker=tracker.out_data, vspace=vs.out_data,
                 training=out_data))
+
+    git_commit()
 
 
 
