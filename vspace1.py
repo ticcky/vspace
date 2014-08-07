@@ -239,7 +239,7 @@ def main():
         print 'OK interrupting learning'
 
     # Do bootstrap for the confusion table.
-    n_bs = 30
+    n_bs = 3
     widgets = [progressbar.Percentage(),
                ' ', progressbar.Bar(),
                ' ', progressbar.ETA(),
