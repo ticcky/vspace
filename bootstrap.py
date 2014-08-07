@@ -46,4 +46,4 @@ def from_confusion_tables(cts):
         for col_id in range(n_cols):
             res_ct[row_id, col_id] = "%.2f (+-%.2f)" % (mean_ct[row_id, col_id], stddev_ct[row_id, col_id])
 
-    return res_ct
+    return ConfusionTable(res_ct, values)
