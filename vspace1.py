@@ -236,6 +236,7 @@ def main():
         print 'OK interrupting learning'
 
     # Do bootstrap for the confusion table.
+    cts = []
     for bs_iter in range(1000):
         n_dialogs = len(vs.training_dialogs)
         dataset = [random.choice(vs.training_dialogs) for _ in range(n_dialogs)]
