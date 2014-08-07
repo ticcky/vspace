@@ -1,4 +1,20 @@
+from collections import defaultdict
+
 from confusion_table import ConfusionTable
+
+
+def from_all_confusion_tables(cts):
+    cts_by_slot = defaultdict(list)
+    for ct in cts:
+        for slot, slot_ct in ct.iteritems():
+            cts_by_slot[slot].append(slot_ct)
+
+    res = {}
+    for slot, slot_cts in cts_by_slot.iteritems():
+        res['slot'] = from_confusion_tables(slot_cts)
+
+    return res
+
 
 
 def from_confusion_tables(cts):

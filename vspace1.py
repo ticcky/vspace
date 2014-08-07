@@ -220,16 +220,14 @@ def main():
     }
 
     vs = VSpace1()
-    try:
-        while 1:
-            try:
-                vs.learn()
-            except KeyboardInterrupt:
-                print 'OK, saving results now!'
-                tracker = Tracker(vs.model)
-                tracker.simulate(vs.training_dialogs)
+    def save_result():
+        tracker = Tracker(vs.model)
+        tracker.simulate(vs.training_dialogs)
 
+    try:
+        vs.learn(on_kbd_interrupt=save_result)
     except KeyboardInterrupt:
+        save_result()
         print 'OK interrupting learning'
 
     # Do bootstrap for the confusion table.
@@ -240,7 +238,7 @@ def main():
         tracker.simulate(dataset)
         cts.append(tracker.out_data['confusion_tables'])
 
-    ct = bootstrap.from_confusion_tables(cts)
+    ct = bootstrap.from_all_confusion_tables(cts)
 
     with open("out/training_bs.html", "w") as f_out:
         f_out.write(tpl.render(tracker=tracker.out_data, vspace=vs.out_data,
