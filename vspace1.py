@@ -239,7 +239,7 @@ def main():
 
     # Do bootstrap for the confusion table.
     n_bs = 100
-    bs_progress = ProgressBar(widgets=[SimpleProgress()], maxval=n_bs).start()
+    bs_progress = progressbar.ProgressBar(widgets=[progressbar.SimpleProgress()], maxval=n_bs).start()
     cts = []
     for bs_iter in range(n_bs):
         n_dialogs = len(vs.training_dialogs)
