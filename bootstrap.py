@@ -13,7 +13,7 @@ def from_all_confusion_tables(cts):
 
     res = {}
     for slot, slot_cts in cts_by_slot.iteritems():
-        res['slot'] = from_confusion_tables(slot_cts)
+        res[slot] = from_confusion_tables(slot_cts)
 
     return res
 
