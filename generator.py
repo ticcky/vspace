@@ -33,8 +33,8 @@ class DialogGenerator:
     acts = ["inform"]  #, "reject", "confirm", "deny"]
 
     ontology = {
-        'from': ['nm', 'prg', 'brno', 'cb'],
-        'to': ['nm', 'prg', 'brno', 'cb'],
+        'from': ['f_nm', 'f_prg', 'f_brno', 'f_cb'],
+        'to': ['f_nm', 'f_prg', 'f_brno', 'f_cb'],
         'time': ['1', '2', '3'],
     }
 
