@@ -30,13 +30,13 @@ def from_confusion_tables(cts):
     # Compute means.
     import ipdb; ipdb.set_trace()
     for ct in cts:
-        for row_id, row in enumerate(ct):
+        for row_id, row in enumerate(ct.rows):
             for col_id, val in enumerate(row):
                 mean_ct[row_id, col_id] += val * 1.0 / len(cts)
 
     # Compute standard deviations.
     for ct in cts:
-        for row_id, row in enumerate(ct):
+        for row_id, row in enumerate(ct.rows):
             for col_id, val in enumerate(row):
                 stddev_ct[row_id, col_id] += (val - mean_ct[row_id, col_id])**2 / (len(cts) - 1)
 
