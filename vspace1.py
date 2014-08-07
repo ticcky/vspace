@@ -91,9 +91,9 @@ class VSpace1:
             f_s_new = function([s_curr, o], s_new)
 
             # Projected state.
-            def proj(v_slot, v_state):
-                return T.tensordot(P[v_slot], v_state, [[0], [0]])
-            proj_curr = proj(slot, s_curr)
+            def proj(v_P, v_slot, v_state):
+                return T.tensordot(v_P[v_slot], v_state, [[0], [0]])
+            proj_curr = proj(P, slot, s_curr)
             f_proj_curr = function([s_curr, slot], proj_curr)
 
             # Loss.
