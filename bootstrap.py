@@ -36,11 +36,10 @@ def from_confusion_tables(cts):
                 stddev_ct[row_id, col_id] += (val**2) * 1.0 / len(cts)
 
     # Compute standard deviations.
-    for ct in cts:
-        for row_id, row in enumerate(ct.rows):
-            for col_id, val in enumerate(row):
-                print stddev_ct[row_id, col_id], mean_ct[row_id, col_id], mean_ct[row_id, col_id]**2, stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2
-                stddev_ct[row_id, col_id] = np.sqrt(stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2)
+    for row_id in range(n_rows):
+        for col_id in range(n_cols):
+            #print stddev_ct[row_id, col_id], mean_ct[row_id, col_id], mean_ct[row_id, col_id]**2, stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2
+            stddev_ct[row_id, col_id] = np.sqrt(stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2)
 
     # Synthetize output table.
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
