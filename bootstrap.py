@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+import numpy as np
+
 from confusion_table import ConfusionTable
 
 
@@ -37,6 +39,7 @@ def from_confusion_tables(cts):
             for col_id, val in enumerate(row):
                 stddev_ct[row_id, col_id] += (val - mean_ct[row_id, col_id])**2 / (len(cts) - 1)
 
+    # Synthetize output table.
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
     for row_id in range(n_rows):
         for col_id in range(n_cols):
