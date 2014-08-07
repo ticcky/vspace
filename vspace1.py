@@ -239,17 +239,14 @@ def main():
 
     # Do bootstrap for the confusion table.
     n_bs = 100
-    bs_progress = progressbar.ProgressBar(widgets=[progressbar.SimpleProgress()], maxval=n_bs).start()
+    bs_progress = progressbar.ProgressBar().start()
     cts = []
-    for bs_iter in range(n_bs):
+    for bs_iter in bs_progress(range(n_bs)):
         n_dialogs = len(vs.training_dialogs)
         dataset = [random.choice(vs.training_dialogs) for _ in range(n_dialogs)]
         tracker = Tracker(vs.model)
         tracker.simulate(dataset)
         cts.append(tracker.out_data['confusion_tables'])
-
-        bs_progress.update(bs_iter)
-    bs_progress.finish()
 
 
     ct = bootstrap.from_all_confusion_tables(cts)
