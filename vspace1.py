@@ -21,6 +21,7 @@ from theano import (function, pp, tensor as T)
 from theano.printing import min_informative_str
 from theano.tensor.shared_randomstreams import RandomStreams
 
+import bootstrap
 from generator import DialogGenerator
 from tracker import (Tracker)
 

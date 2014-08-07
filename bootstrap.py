@@ -35,7 +35,7 @@ def from_confusion_tables(cts):
     for ct in cts:
         for row_id, row in enumerate(ct):
             for col_id, val in enumerate(row):
-                stddev_ct[row_id, col_id] += (val - mean_ct[row_id, col_id])**2 * / (len(cts) - 1)
+                stddev_ct[row_id, col_id] += (val - mean_ct[row_id, col_id])**2 / (len(cts) - 1)
 
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
     for row_id in range(n_rows):
