@@ -29,7 +29,7 @@ class VSpace1:
     dialog_cnt = 100
     lat_dims = 4
     proj_dims = 3
-    learning_iters = 100
+    learning_iters = 1
     learning_rate = 0.1
     rprop_plus = 1.2
     rprop_minus = 0.5
@@ -232,12 +232,19 @@ def main():
     except KeyboardInterrupt:
         print 'OK interrupting learning'
 
-    tracker = Tracker(vs.model)
-    tracker.simulate(vs.training_dialogs)
+    # Do bootstrap for the confusion table.
+    for bs_iter in range(1000):
+        n_dialogs = len(vs.training_dialogs)
+        dataset = [random.choice(vs.training_dialogs) for _ in range(n_dialogs)]
+        tracker = Tracker(vs.model)
+        tracker.simulate(dataset)
+        cts.append(tracker.out_data['confusion_tables'])
 
-    with open("out/training.html", "w") as f_out:
+    ct = bootstrap.from_confusion_tables(cts)
+
+    with open("out/training_bs.html", "w") as f_out:
         f_out.write(tpl.render(tracker=tracker.out_data, vspace=vs.out_data,
-                training=out_data))
+                training=out_data, bootstrap_ct=ct))
 
     git_commit()
 
