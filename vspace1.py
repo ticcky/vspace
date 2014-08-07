@@ -20,7 +20,7 @@ from theano.printing import min_informative_str
 from theano.tensor.shared_randomstreams import RandomStreams
 
 from generator import DialogGenerator
-
+from tracker import (Tracker)
 
 def rand(*args):
     return np.random.rand(*args).astype(theano.config.floatX)
@@ -39,75 +39,75 @@ class VSpace1:
         self.out_data = {}
         gen = DialogGenerator()
         self.training_dialogs = gen.generate_dialogs(self.dialog_cnt)
-        self.values = {dai: ndx for dai, ndx in
+        self.acts = {dai: ndx for dai, ndx in
                 zip(gen.iterate_dais(), itertools.count())}
+
+        self.values = {value: ndx for value, ndx in
+                zip(gen.iterate_values(), itertools.count())}
 
         self.slots = {slot: ndx for slot, ndx in
                 zip(gen.iterate_slots(), itertools.count())}
 
         class Model:
-            @classmethod
-            def to_observation(cls, act):
-                return cls.values[act]
-
             ontology = gen.ontology
             slots = self.slots
             values = self.values
+            acts = self.acts
 
             lat_dims = self.lat_dims
             proj_dims = self.proj_dims
 
             # Current state.
-            s_old = T.vector(name='s')
+            s_curr = T.vector(name='s')
 
-            # Observation index into values.
+            # Observation index into acts.
             o = T.iscalar(name='o')
 
             # Index into slots.
             slot = T.iscalar(name='slot')
 
+            # Index into values.
+            val = T.iscalar(name='val')
+
 
             # Transformation matrices in the update.
-            U = theano.shared(value=rand(len(self.values),
-                    lat_dims, lat_dims))
+            U = theano.shared(value=rand(len(acts), lat_dims, lat_dims))
 
             # Translation vector in the update.
-            u = theano.shared(value=rand(len(self.values),
-                    lat_dims),)
+            u = theano.shared(value=rand(len(acts), lat_dims),)
 
             # Projection matrix for reading the state by hyperplane projection.
-            P = theano.shared(value=rand(len(self.slots),
-                    lat_dims, proj_dims))
+            P = theano.shared(value=rand(len(slots), lat_dims, proj_dims))
 
             # Hyperplane translation vectors.
-            b_value = theano.shared(value=rand(len(self.values),
+            b_value = theano.shared(value=rand(len(values),
                     proj_dims))
 
             params = [U, u, P, b_value]
 
 
             # New state.
-            s_new = T.tensordot(U[o], s_old, [[0], [0]]) + u[o]
-            f_s_new = function([s_old, o], s_new)
+            s_new = T.tensordot(U[o], s_curr, [[0], [0]]) + u[o]
+            f_s_new = function([s_curr, o], s_new)
 
             # Projected state.
-            proj_new = T.tensordot(P[slot], s_new, [[0], [0]])
-            proj_old = T.tensordot(P[slot], s_old, [[0], [0]])
-            f_proj_old = function([s_old, slot], proj_old)
-
+            def proj(v_slot, v_state):
+                return T.tensordot(P[v_slot], v_state, [[0], [0]])
+            proj_curr = proj(slot, s_curr)
+            f_proj_curr = function([s_curr, slot], proj_curr)
 
             # Loss.
-            loss = (proj_new - b_value[o]).norm(2)
+            slot_loss = (proj_curr - b_value[val]).norm(2)
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
-            f_loss = function([s_old, o, slot], loss)
+            f_slot_loss = function([s_curr, val, slot], slot_loss)
 
             # Loss grad.
-            loss_grads = []
+            slot_loss_grads = []
             shapes = []
             for param in params:
                 shapes.append(param.shape.eval())
-                loss_grads.append(
-                        function([s_old, o, slot],
+                slot_loss_grads.append(
+                        function([s_curr, val, slot],
                                 T.grad(loss, wrt=param)))
 
         self.model = Model
@@ -141,21 +141,31 @@ class VSpace1:
 
         # Compute the gradient over the whole training data.
         total_loss = 0.0
+        tracker = Tracker(self.model)
         for dialog in self.training_dialogs:
-            s_old = np.asarray(np.zeros(self.model.lat_dims), dtype=theano.config.floatX)
+            tracker.new_dialog()
             for act in dialog:
-                o = self.model.to_observation(act)
-                slot = self.slots[act.slot]
+                curr_state, true_state = tracker.next(act)
 
-                total_loss += self.model.f_loss(s_old, o, slot)
+                # Prepare array for acummulating the gradient at this time in dialog.
+                curr_loss_grads = []
+                for shape in self.model.shapes:
+                    curr_loss_grads.append(np.zeros(shape, dtype=theano.config.floatX))
 
-                curr_loss_grads = [loss_grad(s_old, o, slot)
-                                   for loss_grad in self.model.loss_grads]
+                # Compute the loss & gradient of the loss.
+                for slot, val in true_state.iteritems():
+                    slot_ndx = self.slots[act.slot]
+                    value_ndx = self.values[val]
+                    total_loss += self.model.f_slot_loss(curr_state, slot_ndx, value_ndx)
+
+                    for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
+                        curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(curr_state, slot_ndx, value_ndx)
+
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
                     accum += 1.0 / n_data * loss_grad
 
-                s_old = self.model.f_s_new(s_old, o)
+                s_old = s_new
 
         # Update RPROP variables according to the resulting gradient.
         for g_rprop, total_g_loss, g_history in zip(rprop.g_rprops, accum_loss_grad, rprop.g_histories):
@@ -172,25 +182,6 @@ class VSpace1:
         return total_loss
 
 
-class TrackerState:
-    threshold = 0.1
-    def __init__(self, scores, true_state):
-        self.scores = scores
-
-        self.true_state = copy.copy(true_state)
-        self.best_vals = {}
-        for slot, vals in self.scores.iteritems():
-            score, val = min((score, val) for val, score in vals.iteritems() if score is not None)
-            if score < self.threshold:
-                self.best_vals[slot] = val
-            else:
-                self.best_vals[slot] = None
-
-    def iter_confusion_entries(self):
-        for slot in self.scores:
-            y_true = self.true_state[slot]
-            y_pred = self.best_vals[slot]
-            yield slot, y_true, y_pred
 
 
 class ConfusionTable:
@@ -198,79 +189,6 @@ class ConfusionTable:
         self.rows = rows
         self.values = values
 
-
-class Tracker:
-    def __init__(self, model):
-        self.model = model
-
-    def new_dialog(self):
-        self.state = np.zeros(self.model.lat_dims, dtype=theano.config.floatX)
-
-    def next(self, act):
-        o = self.model.values[act]
-        self.state = self.model.f_s_new(self.state, o)
-
-    def decode(self, true_state):
-        slot_proj_cache = {}
-        slot_scores = {}
-        for dai, value in self.model.values.iteritems():
-            slot = self.model.slots[dai.slot]
-            if not slot in slot_proj_cache:
-                slot_proj_cache[slot] = self.model.f_proj_old(self.state, slot)
-                slot_scores[dai.slot] = {}
-                slot_scores[dai.slot][None] = None  # So that we have easier displaying.
-            pos = slot_proj_cache[slot]
-            slot_scores[dai.slot][dai.value] = np.linalg.norm(pos
-                    - self.model.b_value.get_value()[value], 2)
-
-
-        return TrackerState(slot_scores, true_state)
-
-
-
-    def simulate(self, dialogs):
-        self.out_data = {
-            'simulation': []
-        }
-
-        ct_y_true = {slot: [] for slot in self.model.slots}
-        ct_y_pred = {slot: [] for slot in self.model.slots}
-
-        for dialog in dialogs:
-            dialog_out = []
-            # At the beginning of the dialog, the true state is that the user
-            # wants nothing.
-            true_state = {slot: None for slot in self.model.slots}
-
-            self.new_dialog()
-
-            for act in dialog:
-                self.next(act)
-
-                # Update the true state.
-                true_state[act.slot] = act.value
-                decoded_state = self.decode(true_state)
-
-                dialog_out.append(
-                        (act, decoded_state))
-
-                for slot, y_true, y_pred in decoded_state.iter_confusion_entries():
-                    ct_y_true[slot].append(unicode(y_true))
-                    ct_y_pred[slot].append(unicode(y_pred))
-
-
-            self.out_data['simulation'].append(dialog_out)
-
-        # Build confusion tables.
-        ct = {}
-        for slot in self.model.slots:
-            vals = ['None'] + self.model.ontology[slot]
-            ct[slot] = ConfusionTable(
-                    confusion_matrix(ct_y_true[slot], ct_y_pred[slot],
-                            vals),
-                    vals)
-
-        self.out_data['confusion_tables'] = ct
 
 
 def git_commit():

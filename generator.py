@@ -51,6 +51,13 @@ class DialogGenerator:
     def iterate_slots(self):
         return iter(self.ontology.keys())
 
+    def iterate_values(self):
+        res = set()
+        for slot, vals in self.ontology.iteritems():
+            for val in vals:
+                res.add(val)
+        return res
+
     def generate_dialog(self, mean_n_turns, mean_n_turn_acts):
         n_turns = np.random.poisson(mean_n_turns - 1) + 1
 
