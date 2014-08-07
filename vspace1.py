@@ -13,8 +13,6 @@ import numpy as np; np.random.seed(0)
 
 import pygit2
 
-from sklearn.metrics import confusion_matrix
-
 import theano
 from theano import (function, pp, tensor as T)
 from theano.printing import min_informative_str

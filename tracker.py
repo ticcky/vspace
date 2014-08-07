@@ -2,6 +2,8 @@ import copy
 
 import numpy as np
 
+from sklearn.metrics import confusion_matrix
+
 import theano
 
 from confusion_table import ConfusionTable
