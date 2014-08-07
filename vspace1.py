@@ -33,7 +33,7 @@ class VSpace1:
     dialog_cnt = 300
     lat_dims = 4
     proj_dims = 3
-    learning_iters = 0
+    learning_iters = 200
     learning_rate = 0.1
     rprop_plus = 1.2
     rprop_minus = 0.5
@@ -239,7 +239,7 @@ def main():
         print 'OK interrupting learning'
 
     # Do bootstrap for the confusion table.
-    n_bs = 3
+    n_bs = 30
     widgets = [progressbar.Percentage(),
                ' ', progressbar.Bar(),
                ' ', progressbar.ETA(),
