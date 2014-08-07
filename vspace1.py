@@ -61,7 +61,7 @@ class VSpace1:
             s_curr = T.vector(name='s')
 
             # Observation index into acts.
-            o = T.iscalar(name='o')
+            act = T.iscalar(name='act')
 
             # Index into slots.
             slot = T.iscalar(name='slot')
@@ -87,8 +87,8 @@ class VSpace1:
 
 
             # New state.
-            s_new = T.tensordot(U[o], s_curr, [[0], [0]]) + u[o]
-            f_s_new = function([s_curr, o], s_new)
+            s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
+            f_s_new = function([s_curr, act], s_new)
 
             # Projected state.
             def proj(v_P, v_slot, v_state):
@@ -109,7 +109,7 @@ class VSpace1:
             for param in params:
                 shapes.append(param.shape.eval())
                 slot_loss_grads.append(
-                        function([s_curr, o, val, slot],
+                        function([s_curr, act, val, slot],
                                 T.grad(new_slot_loss, wrt=param)))
 
         self.model = Model
@@ -146,7 +146,11 @@ class VSpace1:
         tracker = Tracker(self.model)
         for dialog in self.training_dialogs:
             tracker.new_dialog()
+            last_state = tracker.get_state()
             for act in dialog:
+                act_ndx = self.model.acts[act]
+
+                # Run tracker to get the new state and the true state.
                 curr_state, true_state = tracker.next(act)
 
                 # Prepare array for acummulating the gradient at this time in dialog.
@@ -158,16 +162,17 @@ class VSpace1:
                 for slot, val in true_state.iteritems():
                     slot_ndx = self.slots[act.slot]
                     value_ndx = self.values[val]
-                    total_loss += self.model.f_slot_loss(curr_state, slot_ndx, value_ndx)
+                    total_loss += self.model.f_curr_slot_loss(curr_state, slot_ndx, value_ndx)
 
                     for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
-                        curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(curr_state, slot_ndx, value_ndx)
+                        curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, slot_ndx, value_ndx)
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
                     accum += 1.0 / n_data * loss_grad
 
                 s_old = s_new
+                last_state = curr_state
 
         # Update RPROP variables according to the resulting gradient.
         for g_rprop, total_g_loss, g_history in zip(rprop.g_rprops, accum_loss_grad, rprop.g_histories):
