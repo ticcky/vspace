@@ -28,6 +28,7 @@ def from_confusion_tables(cts):
     stddev_ct = np.zeros((n_rows, n_cols))
 
     # Compute means.
+    import ipdb; ipdb.set_trace()
     for ct in cts:
         for row_id, row in enumerate(ct):
             for col_id, val in enumerate(row):
