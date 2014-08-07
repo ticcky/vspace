@@ -171,7 +171,6 @@ class VSpace1:
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
                     accum += 1.0 / n_data * loss_grad
 
-                s_old = s_new
                 last_state = curr_state
 
         # Update RPROP variables according to the resulting gradient.
