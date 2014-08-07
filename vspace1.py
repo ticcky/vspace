@@ -1,5 +1,6 @@
 import copy
 import itertools
+import os
 import time
 import pprint
 
@@ -190,20 +191,14 @@ class VSpace1:
 
 
 
-class ConfusionTable:
-    def __init__(self, rows, values):
-        self.rows = rows
-        self.values = values
-
-
 
 def git_commit():
     # Commit code to git.
     repo = pygit2.Repository(".")
     index = repo.index
     index.read()
-    index.add("vspace1.py")
-    index.add("generator.py")
+    for python_file in [x for x in os.listdir('.') if x.endswith('.py')]:
+        index.add(python_file)
     index.add("out/training.html")
     index.write()
     tree = index.write_tree()
