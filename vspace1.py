@@ -239,8 +239,12 @@ def main():
         print 'OK interrupting learning'
 
     # Do bootstrap for the confusion table.
-    n_bs = 1
-    bs_progress = progressbar.ProgressBar().start()
+    n_bs = 10
+    widgets = [progressbar.Percentage(),
+               ' ', progressbar.Bar(),
+               ' ', progressbar.ETA(),
+               ' ', progressbar.AdaptiveETA()]
+    bs_progress = progressbar.ProgressBar(widgets=widgets).start()
     cts = []
     for bs_iter in bs_progress(range(n_bs)):
         n_dialogs = len(vs.training_dialogs)
