@@ -5,7 +5,6 @@ import time
 import pprint
 import random; random.seed(0)
 
-
 from jinja2 import Environment, FileSystemLoader
 
 import matplotlib.pyplot as plt
@@ -21,6 +20,7 @@ from theano import (function, pp, tensor as T)
 from theano.printing import min_informative_str
 from theano.tensor.shared_randomstreams import RandomStreams
 
+# Project libs.
 import bootstrap
 from generator import DialogGenerator
 from tracker import (Tracker)
