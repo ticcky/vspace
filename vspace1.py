@@ -94,12 +94,14 @@ class VSpace1:
             def proj(v_P, v_slot, v_state):
                 return T.tensordot(v_P[v_slot], v_state, [[0], [0]])
             proj_curr = proj(P, slot, s_curr)
+            proj_new = proj(P, slot, s_new)
             f_proj_curr = function([s_curr, slot], proj_curr)
 
             # Loss.
-            slot_loss = (proj_curr - b_value[val]).norm(2)
+            curr_slot_loss = (proj_curr - b_value[val]).norm(2)
+            new_slot_loss = (proj_new - b_value[val]).norm(2)
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
-            f_slot_loss = function([s_curr, val, slot], slot_loss)
+            f_curr_slot_loss = function([s_curr, val, slot], slot_loss)
 
             # Loss grad.
             slot_loss_grads = []
@@ -107,8 +109,8 @@ class VSpace1:
             for param in params:
                 shapes.append(param.shape.eval())
                 slot_loss_grads.append(
-                        function([s_curr, val, slot],
-                                T.grad(slot_loss, wrt=param)))
+                        function([s_curr, o, val, slot],
+                                T.grad(new_slot_loss, wrt=param)))
 
         self.model = Model
 
