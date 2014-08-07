@@ -3,6 +3,7 @@ import itertools
 import os
 import time
 import pprint
+import random; random.seed(0)
 
 
 from jinja2 import Environment, FileSystemLoader
