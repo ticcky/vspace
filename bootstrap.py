@@ -39,7 +39,7 @@ def from_confusion_tables(cts):
     for ct in cts:
         for row_id, row in enumerate(ct.rows):
             for col_id, val in enumerate(row):
-                stddev_ct[row_id, col_id] += np.sqrt(stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2)
+                stddev_ct[row_id, col_id] = np.sqrt(stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2)
 
     # Synthetize output table.
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
