@@ -108,7 +108,7 @@ class VSpace1:
                 shapes.append(param.shape.eval())
                 slot_loss_grads.append(
                         function([s_curr, val, slot],
-                                T.grad(loss, wrt=param)))
+                                T.grad(slot_loss, wrt=param)))
 
         self.model = Model
 
