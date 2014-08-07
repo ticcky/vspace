@@ -113,7 +113,7 @@ class VSpace1:
 
         self.model = Model
 
-    def learn(self):
+    def learn(self, on_kbd_interrupt=None):
         learning_rate = self.learning_rate
 
         class rprop:
@@ -126,9 +126,13 @@ class VSpace1:
 
         self.out_data['losses'] = []
         for step in range(self.learning_iters):
-            curr_loss = self.learning_iter(learning_rate=learning_rate, rprop=rprop)
-            self.out_data['losses'].append(curr_loss)
-            print curr_loss
+            try:
+                curr_loss = self.learning_iter(learning_rate=learning_rate, rprop=rprop)
+                self.out_data['losses'].append(curr_loss)
+                print curr_loss
+            except KeyboardInterrupt:
+                if on_kbd_interrupt is not None:
+                    on_kbd_interrupt()
 
         self.out_data['data'] = self.training_dialogs
 
