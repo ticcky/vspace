@@ -221,7 +221,14 @@ def main():
 
     vs = VSpace1()
     try:
-        vs.learn()
+        while 1:
+            try:
+                vs.learn()
+            except KeyboardInterrupt:
+                print 'OK, saving results now!'
+                tracker = Tracker(vs.model)
+                tracker.simulate(vs.training_dialogs)
+
     except KeyboardInterrupt:
         print 'OK interrupting learning'
 
