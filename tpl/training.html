@@ -39,12 +39,21 @@ th.conft-val {
 {% endfor %}
 
 <h3>Model</h3>
+
 <h4>Acts</h4>
 <ol>
 {% for act in model.acts %}
 <li>{{act}}</li>
 {% endfor %}
 </ol>
+
+<h4>Values</h4>
+<ol>
+{% for val in model.values %}
+<li>{{val}}</li>
+{% endfor %}
+</ol>
+
 {% for param in model.params %}
 <h4>{{param.name}}</h4>
 <pre>

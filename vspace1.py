@@ -87,19 +87,19 @@ class VSpace1:
                     name="P")
 
             # Hyperplane translation vectors.
-            b_value = theano.shared(value=rand(len(values), proj_dims),
+            b = theano.shared(value=rand(len(values), proj_dims),
                     name="b")
 
 
             params = [U, u, P, b_value]
 
             # New state.
-            s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
+            s_new = T.tensordot(U[act], s_curr, [[1], [0]]) + u[act]
             f_s_new = function([s_curr, act], s_new)
 
             # Projected state.
             def proj(v_P, v_slot, v_state):
-                return T.tensordot(v_P[v_slot], v_state, [[0], [0]])
+                return T.tensordot(v_P[v_slot], v_state, [[1], [0]])
             proj_curr = proj(P, slot, s_curr)
             proj_new = proj(P, slot, s_new)
             f_proj_curr = function([s_curr, slot], proj_curr)
