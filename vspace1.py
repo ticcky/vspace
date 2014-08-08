@@ -1,10 +1,11 @@
 import copy
 import itertools
 import os
-import time
 import pickle
 import pprint
 import random; random.seed(0)
+import sys
+import time
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -27,7 +28,7 @@ from generator import DialogGenerator
 from tracker import (Tracker)
 
 def rand(*args):
-    return np.random.rand(*args).astype(theano.config.floatX)
+    return np.random.randn(*args).astype(theano.config.floatX)
 
 
 class VSpace1:
@@ -75,20 +76,23 @@ class VSpace1:
 
 
             # Transformation matrices in the update.
-            U = theano.shared(value=rand(len(acts), lat_dims, lat_dims))
+            U = theano.shared(value=rand(len(acts), lat_dims, lat_dims),
+                    name="U")
 
             # Translation vector in the update.
-            u = theano.shared(value=rand(len(acts), lat_dims),)
+            u = theano.shared(value=rand(len(acts), lat_dims),
+                    name="u")
 
             # Projection matrix for reading the state by hyperplane projection.
-            P = theano.shared(value=rand(len(slots), lat_dims, proj_dims))
+            P = theano.shared(value=rand(len(slots), lat_dims, proj_dims),
+                    name="P")
 
             # Hyperplane translation vectors.
-            b_value = theano.shared(value=rand(len(values),
-                    proj_dims))
+            b_value = theano.shared(value=rand(len(values), proj_dims),
+                    name="b")
+
 
             params = [U, u, P, b_value]
-
 
             # New state.
             s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
@@ -298,11 +302,16 @@ def visualize(vs):
 
     with open("out/training_bs.html", "w") as f_out:
         f_out.write(tpl.render(tracker=tracker.out_data, vspace=vs.out_data,
-                bootstrap_ct=ct))
+                bootstrap_ct=ct, model=vs.model))
 
 
 if __name__ == '__main__':
-    main()
+    if sys.argv[1] == "run":
+        main()
+    elif sys.argv[1] == "vis":
+        main2()
+    else:
+        print "Doing nothing."
 
 
 
