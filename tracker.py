@@ -39,7 +39,8 @@ class Tracker:
     def get_state(self): return self.state
 
     def new_dialog(self):
-        self.state = np.zeros(self.model.lat_dims, dtype=theano.config.floatX)
+        self.state = self.model.s0.get_value()
+        #np.zeros(self.model.lat_dims, dtype=theano.config.floatX)
 
     def next(self, act):
         o = self.model.acts[act]

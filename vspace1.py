@@ -76,6 +76,9 @@ class VSpace1:
             val = T.iscalar(name='val')
 
 
+            s0 = theano.shared(value=rand(lat_dims),
+                    name="s0")
+
             # Transformation matrices in the update.
             U = theano.shared(value=rand(len(acts), lat_dims, lat_dims),
                     name="U")
@@ -93,7 +96,7 @@ class VSpace1:
                     name="b")
 
 
-            params = [U, u, P, b_value]
+            params = [s0, U, u, P, b_value]
 
             # New state.
             s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
@@ -242,8 +245,7 @@ def git_commit():
 def main():
     git_commit()
 
-    vs = train()
-    visualize(vs)
+    vs = train_and_visualize()
 
     git_commit()
 
@@ -252,11 +254,10 @@ def main2():
     visualize(vs)
 
 
-def train():
+def train_and_visualize():
     vs = VSpace1()
     def save_result():
-        tracker = Tracker(vs.model)
-        tracker.simulate(vs.training_dialogs)
+        visualize(vs)
 
     try:
         vs.learn(on_kbd_interrupt=save_result)
@@ -266,6 +267,7 @@ def train():
         print 'OK interrupting learning'
 
     vs.model.save_params("out/training_bs.model")
+    save_result()
 
     return vs
 
