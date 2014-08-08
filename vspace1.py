@@ -87,7 +87,7 @@ class VSpace1:
                     name="P")
 
             # Hyperplane translation vectors.
-            b = theano.shared(value=rand(len(values), proj_dims),
+            b_value = theano.shared(value=rand(len(values), proj_dims),
                     name="b")
 
 
