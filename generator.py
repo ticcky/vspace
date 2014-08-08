@@ -54,7 +54,7 @@ class DialogGenerator:
     def iterate_values(self):
         res = set()
         for slot, vals in self.ontology.iteritems():
-            res.add(None)
+            res.add("None-%s" % slot)
             for val in vals:
                 res.add(val)
         return res
