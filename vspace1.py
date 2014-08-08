@@ -34,7 +34,7 @@ class VSpace1:
     dialog_cnt = 100
     lat_dims = 3
     proj_dims = 3
-    learning_iters = 100
+    learning_iters = 1
     learning_rate = 1.0
     rprop_plus = 1.2
     rprop_minus = 0.5
@@ -259,6 +259,8 @@ def train():
         save_result()
         vs.model.save_params("out/training_bs.model")
         print 'OK interrupting learning'
+
+    vs.model.save_params("out/training_bs.model")
 
     return vs
 
