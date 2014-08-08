@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import copy
 import itertools
 import os
@@ -44,8 +45,8 @@ class VSpace1:
         self.out_data = {}
         gen = DialogGenerator()
         self.training_dialogs = gen.generate_dialogs(self.dialog_cnt)
-        self.acts = {dai: ndx for dai, ndx in
-                zip(gen.iterate_dais(), itertools.count())}
+        self.acts = OrderedDict((dai, ndx) for dai, ndx in
+                zip(gen.iterate_dais(), itertools.count()))
 
         self.values = {value: ndx for value, ndx in
                 zip(gen.iterate_values(), itertools.count())}
