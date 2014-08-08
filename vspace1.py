@@ -106,7 +106,7 @@ class VSpace1:
 
             # Loss.
             curr_slot_loss = (proj_curr - b_value[val]).norm(2)
-            new_slot_loss = (proj_new - b_value[val]).norm(2) + (s_curr - s_new).norm(2)
+            new_slot_loss = (proj_new - b_value[val]).norm(2) +  1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2)
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
             f_curr_slot_loss = function([s_curr, slot, val], curr_slot_loss)
 
