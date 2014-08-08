@@ -101,9 +101,9 @@ class Tracker:
         ct = {}
         for slot in self.model.slots:
             vals = ['None'] + self.model.ontology[slot]
-            print ct_y_true[slot]
-            print ct_y_pred[slot]
-            print
+            #print ct_y_true[slot]
+            #print ct_y_pred[slot]
+            print slot
             ct[slot] = ConfusionTable(
                     confusion_matrix(ct_y_true[slot], ct_y_pred[slot],
                             vals),
