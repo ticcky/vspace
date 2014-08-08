@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block css %}
+table.state-values {
+  color: #999;
+}
+
+table.state-values tr.correct td,
+table.state-values tr.correct th {
+  color: black;
+}
+
+
+td.conft-val,
+th.conft-val {
+  width: 40px;
+}
+{% endblock %}
+
+{% block body %}
+<h3>Confusion tables</h3>
+{% for slot, ct in bootstrap_ct.iteritems() %}
+<table class="table table-bordered">
+  <tr>
+    <th class="conft-val">{{slot}}</th>
+    {% for val in ct.values %}
+    <td class="conft-val">pred({{val}})</td>
+    {% endfor %}
+  </tr>
+  {% for val, row in zip(ct.values, ct.rows) %}
+  <tr>
+    <td>true({{val}})</td>
+    {% for conf_val in row %}
+    <td>{% if conf_val > 0 %}{{conf_val}}{% endif %}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}
+
+
+<h3>Losses</h3>
+{{vspace.losses}}
+
+<h3>Tracker</h3>
+{% for dialog in tracker.simulation %}
+<h4>-- new dialog --</h4>
+{% for act, state in dialog %}
+<div class="row">
+  <div class="col-md-6">
+    {{act}}
+  </div>
+  <div class="col-md-6">
+    {% for slot, vals in state.scores.iteritems() %}
+    p({{slot}}={{state.best_vals[slot]}}) t({{slot}}={{state.true_state[slot]}})
+    {% endfor %}
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      {% for slot, vals in state.scores.iteritems() %}
+      <tr>
+        <th>{{slot}}</th>
+        <td>
+          <table class="table table-bordered table-condensed state-values">
+            {% for val, score in vals.iteritems() %}
+            <tr class="{% if state.best_vals[slot] == val %}info{% endif %} {% if state.true_state[slot] == val %}correct{% endif %}">
+              <th>
+                {{val}}
+              </th>
+              <td>
+                {% if score != None %}
+                {{score|round(2)}}
+                {% else %}
+                --
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endfor %}
+{% endfor %}
+
+<h3>Training Data</h3>
+{% for dialog in vspace.data %}
+<table>
+  <tr>
+    <th>Dialog</th>
+  </tr>
+  {% for act in dialog %}
+  <tr>
+    <td>{{act}}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

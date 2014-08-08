@@ -2,18 +2,19 @@ import copy
 import itertools
 import os
 import time
+import pickle
 import pprint
 import random; random.seed(0)
 
 from jinja2 import Environment, FileSystemLoader
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 import numpy as np; np.random.seed(0)
 
 import progressbar
 
-import pygit2
+# import pygit2
 
 import theano
 from theano import (function, pp, tensor as T)
@@ -30,11 +31,11 @@ def rand(*args):
 
 
 class VSpace1:
-    dialog_cnt = 300
-    lat_dims = 2
+    dialog_cnt = 100
+    lat_dims = 3
     proj_dims = 3
-    learning_iters = 200
-    learning_rate = 0.1
+    learning_iters = 100
+    learning_rate = 1.0
     rprop_plus = 1.2
     rprop_minus = 0.5
 
@@ -114,6 +115,19 @@ class VSpace1:
                 slot_loss_grads.append(
                         function([s_curr, act, slot, val],
                                 T.grad(new_slot_loss, wrt=param)))
+
+            @classmethod
+            def save_params(cls, file_name):
+                with open(file_name, "w") as f_out:
+                    f_out.write(pickle.dumps(cls.params))
+
+            @classmethod
+            def load_params(cls, file_name):
+                with open(file_name) as f_in:
+                    loaded_params = pickle.loads(f_in.read())
+
+                    for l_param, param in zip(loaded_params, cls.params):
+                        param.set_value(l_param.get_value())
 
         self.model = Model
 
@@ -199,6 +213,10 @@ class VSpace1:
 
 
 def git_commit():
+    os.system("git add *.py")
+    os.system("git add out/*.html")
+    os.system("git commit -am 'Automatic.'")
+    return
     # Commit code to git.
     repo = pygit2.Repository(".")
     index = repo.index
@@ -219,14 +237,17 @@ def git_commit():
 def main():
     git_commit()
 
-    env = Environment(loader=FileSystemLoader('tpl'))
-    env.globals.update(zip=zip)
-    tpl = env.get_template('training.html')
+    vs = train()
+    visualize(vs)
 
-    out_data = {
-        'losses': []
-    }
+    git_commit()
 
+def main2():
+    vs = load_model("out/training_bs.model")
+    visualize(vs)
+
+
+def train():
     vs = VSpace1()
     def save_result():
         tracker = Tracker(vs.model)
@@ -236,10 +257,22 @@ def main():
         vs.learn(on_kbd_interrupt=save_result)
     except KeyboardInterrupt:
         save_result()
+        vs.model.save_params("out/training_bs.model")
         print 'OK interrupting learning'
 
+    return vs
+
+
+def load_model(file_name):
+    vs = VSpace1()
+    vs.model.load_params(file_name)
+
+    return vs
+
+
+def visualize(vs):
     # Do bootstrap for the confusion table.
-    n_bs = 30
+    n_bs = 10
     widgets = [progressbar.Percentage(),
                ' ', progressbar.Bar(),
                ' ', progressbar.ETA(),
@@ -256,18 +289,19 @@ def main():
 
     ct = bootstrap.from_all_confusion_tables(cts)
 
+
+    env = Environment(loader=FileSystemLoader('tpl'))
+    env.globals.update(zip=zip)
+    tpl = env.get_template('training.html')
+
     with open("out/training_bs.html", "w") as f_out:
         f_out.write(tpl.render(tracker=tracker.out_data, vspace=vs.out_data,
-                training=out_data, bootstrap_ct=ct))
+                bootstrap_ct=ct))
 
-    git_commit()
-
-
-
-# Removing something.
 
 if __name__ == '__main__':
     main()
+
 
 
 
