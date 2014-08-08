@@ -75,10 +75,6 @@ class VSpace1:
             # Index into values.
             val = T.iscalar(name='val')
 
-
-            s0 = theano.shared(value=rand(lat_dims),
-                    name="s0")
-
             # Transformation matrices in the update.
             U = theano.shared(value=rand(len(acts), lat_dims, lat_dims),
                     name="U")
@@ -96,7 +92,7 @@ class VSpace1:
                     name="b")
 
 
-            params = [s0, U, u, P, b_value]
+            params = [U, u, P, b_value]
 
             # New state.
             s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
