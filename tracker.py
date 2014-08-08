@@ -34,7 +34,7 @@ class TrackerState:
 class Tracker:
     def __init__(self, model):
         self.model = model
-        self.true_state = {slot: None for slot in self.model.slots}
+        self.true_state = {slot: "None-%s" % slot for slot in self.model.slots}
         self.state = None
 
     def get_state(self): return self.state
