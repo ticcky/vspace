@@ -27,9 +27,8 @@ from theano.tensor.shared_randomstreams import RandomStreams
 import bootstrap
 from generator import DialogGenerator
 from tracker import (Tracker)
+from common import rand
 
-def rand(*args):
-    return np.random.randn(*args).astype(theano.config.floatX)
 
 
 class VSpace1:

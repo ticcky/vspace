@@ -6,6 +6,7 @@ from sklearn.metrics import confusion_matrix
 
 import theano
 
+from common import rand
 from confusion_table import ConfusionTable
 
 
@@ -39,7 +40,7 @@ class Tracker:
     def get_state(self): return self.state
 
     def new_dialog(self):
-        self.state = np.randn(self.model.lat_dims, dtype=theano.config.floatX)
+        self.state = rand(self.model.lat_dims)
 
     def next(self, act):
         o = self.model.acts[act]
