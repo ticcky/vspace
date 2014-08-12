@@ -53,7 +53,7 @@ class DialogGenerator:
 
     def iterate_values(self):
         for slot, vals in self.ontology.iteritems():
-            res.add("None-%s" % slot)
+            yield "None-%s" % slot
             for val in vals:
                 yield val
 
