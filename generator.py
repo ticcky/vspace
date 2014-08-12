@@ -65,6 +65,9 @@ class DialogGenerator:
         n_turns = np.random.poisson(mean_n_turns - 1) + 1
 
         dialog = Dialog()
+        for null in self.iterate_nulls():
+            dialog.append(null)
+
         for turn in range(n_turns):
             res = []
             done_slots = []
