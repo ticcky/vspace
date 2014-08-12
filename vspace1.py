@@ -161,7 +161,7 @@ class VSpace1:
 
         self.out_data['data'] = self.training_dialogs
 
-    def learning_iter(self, learning_rate, rprop, debug=True):
+    def learning_iter(self, learning_rate, rprop, debug=False):
         if debug:
             print "> Starting learning iter"
 
@@ -206,7 +206,7 @@ class VSpace1:
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
                 for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
-                    curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, val)
+                    curr_loss_grads[i] += slot_loss_grad(last_state, act_ndx, val)
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
