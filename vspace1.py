@@ -146,10 +146,10 @@ class VSpace1:
             ])
             b_value = theano.shared(value=b_val, name="b")
 
+            alphas = theano.shared(value=np.zeros(len(self.slots)), name="b")
 
             params = [U, u, P, b_value, alphas]
 
-            alphas = theano.shared(value=np.zeros(len(self.slots)), name="b")
 
             # New state.
             s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
