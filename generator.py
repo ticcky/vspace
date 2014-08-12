@@ -52,12 +52,10 @@ class DialogGenerator:
         return iter(self.ontology.keys())
 
     def iterate_values(self):
-        res = set()
         for slot, vals in self.ontology.iteritems():
             res.add("None-%s" % slot)
             for val in vals:
-                res.add(val)
-        return res
+                yield val
 
     def generate_dialog(self, mean_n_turns, mean_n_turn_acts):
         n_turns = np.random.poisson(mean_n_turns - 1) + 1
