@@ -148,7 +148,7 @@ class VSpace1:
 
             alphas = theano.shared(value=np.zeros(len(self.slots)), name="alphas")
 
-            params = [alphas, U, u, P, b_value]
+            params = [U, u, P, b_value]
 
 
             # New state.
@@ -169,7 +169,7 @@ class VSpace1:
                 new_slot_loss += ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
                 curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum()
             curr_slot_loss = 0.5 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2)) + curr_slot_loss
-            new_slot_loss = new_slot_loss
+            new_slot_loss = 0.5 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2)) + new_slot_loss
             #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
             f_curr_slot_loss = function([s_curr, val], curr_slot_loss)
