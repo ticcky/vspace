@@ -164,8 +164,8 @@ class VSpace1:
             curr_slot_loss = 0.0  #((proj_curr - b_value[val])**2).sum()
             new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
             for i_slot in range(len(self.slots)):
-                new_slot_loss += ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
-                curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum()
+                new_slot_loss += ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum() + 1.0 / P.norm(2)
+                curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum() + 1.0 / P.norm(2)
             curr_slot_loss = curr_slot_loss
             new_slot_loss = new_slot_loss
             #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
