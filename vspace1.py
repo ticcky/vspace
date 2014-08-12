@@ -198,6 +198,10 @@ class VSpace1:
                 # Compute the loss & gradient of the loss.
                 val = [self.values[true_state[slot]] for slot in self.slots]
 
+                if debug:
+                    print ">>>> true state:", true_state
+                    print ">>>> vals:", val
+
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
                 for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
