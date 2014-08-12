@@ -377,7 +377,7 @@ def visualize(vs):
     bs_progress = progressbar.ProgressBar(widgets=widgets).start()
 
     tracker = Tracker(vs.model)
-    tracker.simulate(dataset)
+    tracker.simulate(vs.training_dialogs)
 
     cts = []
     for bs_iter in bs_progress(range(n_bs)):
