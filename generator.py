@@ -42,6 +42,11 @@ class DialogGenerator:
         if not really_random:
             random.seed(0)
 
+    def iterate_nulls(self):
+        for slot, vals in self.ontology.iteritems():
+            yield Act("inform", slot, vals[0])
+
+
     def iterate_dais(self):
         for act in self.acts:
             for slot, vals in self.ontology.iteritems():
