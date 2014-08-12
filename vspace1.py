@@ -148,7 +148,7 @@ class VSpace1:
 
             alphas = theano.shared(value=np.zeros(len(self.slots)), name="b")
 
-            params = [U, u, P, b_value, alphas]
+            params = [alphas, U, u, P, b_value]
 
 
             # New state.
@@ -183,6 +183,7 @@ class VSpace1:
                 slot_loss_grads.append(
                         function([s_curr, act, val],
                                 T.grad(new_slot_loss, wrt=param)))
+
 
             @classmethod
             def save_params(cls, file_name):
@@ -285,7 +286,11 @@ class VSpace1:
 
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
-            param.set_value(param.get_value() - g_rprop * (1 * np.sign(acumm)))
+            if param.get_name() != "alphas":
+                c = 1.0
+            else:
+                c = -1.0
+            param.set_value(param.get_value() - c * g_rprop * (1 * np.sign(acumm)))
 
         return total_loss
 
