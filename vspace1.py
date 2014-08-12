@@ -4,7 +4,7 @@ import itertools
 import os
 import pickle
 import pprint
-import random; random.seed(0)
+import random  #; random.seed(0)
 import sys
 import time
 
@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 #import matplotlib.pyplot as plt
 
-import numpy as np; np.random.seed(0)
+import numpy as np  #; np.random.seed(0)
 
 import progressbar
 
