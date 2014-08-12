@@ -112,7 +112,7 @@ class VSpace1:
                 curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum()
             #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
-            f_curr_slot_loss = function([s_curr, slot, val], curr_slot_loss)
+            f_curr_slot_loss = function([s_curr, val], curr_slot_loss)
 
             # Loss grad.
             slot_loss_grads = []
@@ -120,7 +120,7 @@ class VSpace1:
             for param in params:
                 shapes.append(param.shape.eval())
                 slot_loss_grads.append(
-                        function([s_curr, act, slot, val],
+                        function([s_curr, act, val],
                                 T.grad(new_slot_loss, wrt=param)))
 
             @classmethod
@@ -189,10 +189,10 @@ class VSpace1:
                 # Compute the loss & gradient of the loss.
                 val = [self.values[true_state[slot]] for slot in self.slots]
 
-                total_loss += self.model.f_curr_slot_loss(curr_state, slot_ndx, val)
+                total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
                 for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
-                    curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, slot_ndx, val)
+                    curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, val)
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
