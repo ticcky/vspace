@@ -99,7 +99,7 @@ class VSpace1:
 
             # Projected state.
             def proj(v_P, v_slot, v_state):
-                return T.tensordot(v_P[v_slot], v_state, [[0], [0]])
+                return T.tensordot(v_P[v_slot], v_state, [[0], [0]]) / v_P[v_slot].sum()
             proj_curr = proj(P, slot, s_curr)
             proj_new = proj(P, slot, s_new)
             f_proj_curr = function([s_curr, slot], proj_curr)
@@ -209,10 +209,6 @@ class VSpace1:
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
             param.set_value(param.get_value() - g_rprop * (1 * np.sign(acumm)))
-
-        # Normalize P.
-        import ipdb; ipdb.set_trace()
-        #self.model.P.
 
         return total_loss
 
