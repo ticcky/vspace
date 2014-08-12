@@ -146,7 +146,7 @@ class VSpace1:
             ])
             b_value = theano.shared(value=b_val, name="b")
 
-            alphas = theano.shared(value=np.zeros(len(self.slots)), name="b")
+            alphas = theano.shared(value=np.zeros(len(self.slots)), name="alphas")
 
             params = [alphas, U, u, P, b_value]
 
@@ -168,7 +168,7 @@ class VSpace1:
             for i_slot in range(len(self.slots)):
                 new_slot_loss += ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum() * alphas[i_slot]
                 curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum() * alphas[i_slot]
-            curr_slot_loss = -0.5 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2)) + curr_slot_loss
+            curr_slot_loss = 0.5 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2)) - curr_slot_loss
             new_slot_loss = new_slot_loss
             #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
@@ -286,7 +286,6 @@ class VSpace1:
 
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
-            print param.name
             if param.name != "alphas":
                 c = 1.0
             else:
