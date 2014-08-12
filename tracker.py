@@ -40,7 +40,7 @@ class Tracker:
     def get_state(self): return self.state
 
     def new_dialog(self):
-        self.state = rand(self.model.lat_dims)
+        self.state = np.zeros(self.model.lat_dims)
 
     def next(self, act):
         o = self.model.acts[act]
