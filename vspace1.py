@@ -171,9 +171,9 @@ class VSpace1:
                     slot_val_ndx = self.values[slot_val]
 
                     # Want to maximize distance of other vars.
-                    new_slot_loss += T.neq(val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((proj(P, i_slot, s_new) - b_value[slot_val_ndx])).sum())
+                    new_slot_loss += T.neq(val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((proj(P, i_slot, s_new) - b_value[slot_val_ndx])**2).sum())
                     # Minimize distance of our vars
-                    new_slot_loss += T.eq(val[i_slot], slot_val_ndx) * (((proj(P, i_slot, s_new) - b_value[slot_val_ndx])).sum())
+                    new_slot_loss += T.eq(val[i_slot], slot_val_ndx) * (((proj(P, i_slot, s_new) - b_value[slot_val_ndx])**2).sum())
 
                     curr_slot_loss += T.nnet.softplus(1 - ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum()) * T.neq(val[i_slot], slot_val_ndx)
                     curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum() * T.eq(val[i_slot], slot_val_ndx)
