@@ -58,7 +58,7 @@ class VSpace1:
             slots = self.slots
             values = self.values
             acts = self.acts
-            nulls = gen.iterate_nulls()
+            nulls = list(gen.iterate_nulls())
 
             lat_dims = self.lat_dims
             proj_dims = self.proj_dims
