@@ -290,6 +290,7 @@ class VSpace1:
                 c = 1.0
             else:
                 c = -1.0
+            print c
             param.set_value(param.get_value() - c * g_rprop * (1 * np.sign(acumm)))
 
         return total_loss
