@@ -119,9 +119,9 @@ class VSpace1:
             # Projection matrix for reading the state by hyperplane projection.
             P_val = rand(len(slots), lat_dims, proj_dims)
             P_val = np.array([
-                [[1.0, 0.0, 0.0]],
-                [[0.0, 1.0, 0.0]],
-                [[0.0, 0.0, 1.0]],
+                [[1.0], [0.0], [0.0]],
+                [[0.0], [1.0], [0.0]],
+                [[0.0], [0.0], [1.0]],
             ])
             P = theano.shared(value=P_val, name="P")
 
