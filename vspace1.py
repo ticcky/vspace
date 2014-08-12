@@ -287,10 +287,9 @@ class VSpace1:
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
             if param.name != "alphas":
-                c = 1.0
-            else:
                 c = -1.0
-            print c
+            else:
+                c = 1.0
             param.set_value(param.get_value() - c * g_rprop * (1 * np.sign(acumm)))
 
         return total_loss
