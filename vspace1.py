@@ -76,7 +76,7 @@ class VSpace1:
 
             # Transformation matrices in the update.
             U_val = rand(len(acts), lat_dims, lat_dims),
-            U_val = np.array([
+            U_val_hand = np.array([
                 [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
                 [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
                 [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
@@ -97,7 +97,7 @@ class VSpace1:
 
             # Translation vector in the update.
             u_val = rand(len(acts), lat_dims)
-            u_val = np.array([
+            u_val_hand = np.array([
                 [0.0, 0.0, 0.0],
                 [1.0, 0.0, 0.0],
                 [2.0, 0.0, 0.0],
@@ -118,7 +118,7 @@ class VSpace1:
 
             # Projection matrix for reading the state by hyperplane projection.
             P_val = rand(len(slots), lat_dims, proj_dims)
-            P_val = np.array([
+            P_val_hand = np.array([
                 [[1.0], [0.0], [0.0]],
                 [[0.0], [1.0], [0.0]],
                 [[0.0], [0.0], [1.0]],
@@ -127,7 +127,7 @@ class VSpace1:
 
             # Hyperplane translation vectors.
             b_val = rand(len(values), proj_dims)
-            b_val = np.array([
+            b_val_hand = np.array([
                 [0.0],
                 [1.0],
                 [2.0],
