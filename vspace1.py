@@ -75,20 +75,64 @@ class VSpace1:
             val = T.ivector(name='val')
 
             # Transformation matrices in the update.
-            U = theano.shared(value=rand(len(acts), lat_dims, lat_dims),
-                    name="U")
+            U_val = rand(len(acts), lat_dims, lat_dims),
+            U_val = np.array([
+                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+            ])
+            U = theano.shared(value=U_val, name="U")
 
             # Translation vector in the update.
-            u = theano.shared(value=rand(len(acts), lat_dims),
-                    name="u")
+            u_val = rand(len(acts), lat_dims)
+            u_val = np.array([
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [2.0, 0.0, 0.0],
+                [3.0, 0.0, 0.0],
+                [4.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 2.0, 0.0],
+                [0.0, 3.0, 0.0],
+                [0.0, 4.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, 2.0],
+                [0.0, 0.0, 3.0],
+                [0.0, 0.0, 4.0],
+            ])
+            u = theano.shared(value=u_val, name="u")
 
             # Projection matrix for reading the state by hyperplane projection.
-            P = theano.shared(value=rand(len(slots), lat_dims, proj_dims),
-                    name="P")
+            P_val = rand(len(slots), lat_dims, proj_dims)
+            P_val = np.array([
+                [[1.0, 0.0, 0.0]],
+                [[0.0, 1.0, 0.0]],
+                [[0.0, 0.0, 1.0]],
+            ])
+            P = theano.shared(value=P_val, name="P")
 
             # Hyperplane translation vectors.
-            b_value = theano.shared(value=rand(len(values), proj_dims),
-                    name="b")
+            b_val = rand(len(values), proj_dims)
+            b_val = np.array([
+                [0.0],
+                [1.0],
+                [2.0],
+                [3.0],
+                [4.0],
+                [0.0],
+                [1.0],
+                [2.0],
+                [3.0],
+                [4.0],
+                [0.0],
+                [1.0],
+                [2.0],
+                [3.0],
+                [4.0],
+            ])
+            b_value = theano.shared(value=b_val, name="b")
 
 
             params = [U, u, P, b_value]
