@@ -286,6 +286,7 @@ class VSpace1:
 
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
+            print param.name
             if param.name != "alphas":
                 c = 1.0
             else:
