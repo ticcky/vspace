@@ -169,13 +169,14 @@ class VSpace1:
                 #new_slot_diff = ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
                 for slot_val in gen.ontology[slot_name]:
                     slot_val_ndx = self.values[slot_val]
-                    # Want to maximize distance of other vars.
-                    new_slot_loss += T.nnet.softplus(1 -((proj(P, i_slot, s_new) - b_value[val[i_slot]])).sum()) * T.neq(val[i_slot], slot_val_ndx)
-                    # Minimize distance of our vars
-                    new_slot_loss += (((proj(P, i_slot, s_new) - b_value[val[i_slot]])).sum()) * T.eq(val[i_slot], slot_val_ndx)
 
-                    curr_slot_loss += T.nnet.softplus(1 - ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum()) * T.neq(val[i_slot], slot_val_ndx)
-                    curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum() * T.eq(val[i_slot], slot_val_ndx)
+                    # Want to maximize distance of other vars.
+                    new_slot_loss += T.neq(val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((proj(P, i_slot, s_new) - b_value[slot_val_ndx])).sum())
+                    # Minimize distance of our vars
+                    new_slot_loss += T.eq(val[i_slot], slot_val_ndx) * (((proj(P, i_slot, s_new) - b_value[slot_val_ndx])).sum())
+
+                    curr_slot_loss += T.nnet.softplus(1 - ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum()) * T.neq(val[i_slot], slot_val_ndx)
+                    curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum() * T.eq(val[i_slot], slot_val_ndx)
 
             curr_slot_loss = curr_slot_loss
             new_slot_loss = new_slot_loss
@@ -374,6 +375,10 @@ def visualize(vs):
                ' ', progressbar.ETA(),
                ' ', progressbar.AdaptiveETA()]
     bs_progress = progressbar.ProgressBar(widgets=widgets).start()
+
+    tracker = Tracker(vs.model)
+    tracker.simulate(dataset)
+
     cts = []
     for bs_iter in bs_progress(range(n_bs)):
         n_dialogs = len(vs.training_dialogs)
