@@ -47,11 +47,11 @@ class VSpace1:
         self.acts = OrderedDict((dai, ndx) for dai, ndx in
                 zip(gen.iterate_dais(), itertools.count()))
 
-        self.values = {value: ndx for value, ndx in
-                zip(gen.iterate_values(), itertools.count())}
+        self.values = OrderedDict((value, ndx) for value, ndx in
+                zip(gen.iterate_values(), itertools.count()))
 
-        self.slots = {slot: ndx for slot, ndx in
-                zip(gen.iterate_slots(), itertools.count())}
+        self.slots = OrderedDict((slot, ndx) for slot, ndx in
+                zip(gen.iterate_slots(), itertools.count()))
 
         class Model:
             ontology = gen.ontology
@@ -72,7 +72,7 @@ class VSpace1:
             slot = T.iscalar(name='slot')
 
             # Index into values.
-            val = T.iscalar(name='val')
+            val = T.ivector(name='val')
 
             # Transformation matrices in the update.
             U = theano.shared(value=rand(len(acts), lat_dims, lat_dims),
@@ -105,8 +105,11 @@ class VSpace1:
             f_proj_curr = function([s_curr, slot], proj_curr)
 
             # Loss.
-            curr_slot_loss = ((proj_curr - b_value[val])**2).sum()
-            new_slot_loss = ((proj_new - b_value[val])**2).sum()
+            curr_slot_loss = 0.0  #((proj_curr - b_value[val])**2).sum()
+            new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
+            for i_slot in self.slots:
+                new_slot_loss += ((proj(P, i_slot, s_new) - b_value[val[self.slots[i_slot]]])**2).sum()
+                curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[self.slots[i_slot]]])**2).sum()
             #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
             #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
             f_curr_slot_loss = function([s_curr, slot, val], curr_slot_loss)
@@ -184,13 +187,12 @@ class VSpace1:
                     curr_loss_grads.append(np.zeros(shape, dtype=theano.config.floatX))
 
                 # Compute the loss & gradient of the loss.
-                for slot, val in true_state.iteritems():
-                    slot_ndx = self.slots[act.slot]
-                    value_ndx = self.values[val]
-                    total_loss += self.model.f_curr_slot_loss(curr_state, slot_ndx, value_ndx)
+                val = [self.values[true_state[slot]] for slot in self.slots]
 
-                    for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
-                        curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, slot_ndx, value_ndx)
+                total_loss += self.model.f_curr_slot_loss(curr_state, slot_ndx, val)
+
+                for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
+                    curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, slot_ndx, val)
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
