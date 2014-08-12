@@ -161,7 +161,7 @@ class VSpace1:
 
         self.out_data['data'] = self.training_dialogs
 
-    def learning_iter(self, learning_rate, rprop, debug=True):
+    def learning_iter(self, learning_rate, rprop, debug=False):
         if debug:
             print "> Starting learning iter"
 
