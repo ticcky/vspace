@@ -201,6 +201,7 @@ class VSpace1:
                 if debug:
                     print ">>>> true state:", true_state
                     print ">>>> vals:", val
+                    import ipdb; ipdb.set_trace()
 
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
