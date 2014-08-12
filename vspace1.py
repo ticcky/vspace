@@ -93,7 +93,7 @@ class VSpace1:
                 [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
                 [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
             ])
-            U = theano.shared(value=U_val, name="U")
+            U = theano.shared(value=U_val_hand, name="U")
 
             # Translation vector in the update.
             u_val = rand(len(acts), lat_dims)
