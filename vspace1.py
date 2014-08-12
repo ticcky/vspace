@@ -210,6 +210,10 @@ class VSpace1:
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
             param.set_value(param.get_value() - g_rprop * (1 * np.sign(acumm)))
 
+        # Normalize P.
+        import ipdb; ipdb.set_trace()
+        #self.model.P.
+
         return total_loss
 
 
