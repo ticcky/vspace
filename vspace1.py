@@ -191,7 +191,7 @@ class VSpace1:
 
                     for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
                         curr_loss_grads[i] += 1.0 / len(true_state) * slot_loss_grad(last_state, act_ndx, slot_ndx, value_ndx)
-                        print curr_loss_grads[i]
+                        print i, curr_loss_grads[i]
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
