@@ -99,7 +99,7 @@ class VSpace1:
 
             # Projected state.
             def proj(v_P, v_slot, v_state):
-                return T.tensordot(v_P[v_slot], v_state, [[0], [0]]) / v_P[v_slot].sum()
+                return T.tensordot(v_P[v_slot], v_state, [[0], [0]]) / v_P[v_slot].norm(2)
             proj_curr = proj(P, slot, s_curr)
             proj_new = proj(P, slot, s_new)
             f_proj_curr = function([s_curr, slot], proj_curr)
