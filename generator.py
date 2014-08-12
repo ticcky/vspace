@@ -33,9 +33,9 @@ class DialogGenerator:
     acts = ["inform"]  #, "reject", "confirm", "deny"]
 
     ontology = {
-        'from': ['f_nm', 'f_prg', 'f_brno', 'f_cb'],
-        'to': ['t_nm', 't_prg', 't_brno', 't_cb'],
-        'time': ['1', '2', '3'],
+        'from': ['f_null', 'f_nm', 'f_prg', 'f_brno', 'f_cb'],
+        'to': ['t_null', 't_nm', 't_prg', 't_brno', 't_cb'],
+        'time': ['tm_null', '1', '2', '3'],
     }
 
     def __init__(self, really_random=False):
@@ -53,7 +53,6 @@ class DialogGenerator:
 
     def iterate_values(self):
         for slot, vals in self.ontology.iteritems():
-            yield "None-%s" % slot
             for val in vals:
                 yield val
 
@@ -69,7 +68,7 @@ class DialogGenerator:
                 while slot is None or slot in done_slots:
                     act = random.choice(self.acts)
                     slot = random.choice(self.ontology.keys())
-                    value = random.choice(self.ontology[slot])
+                    value = random.choice(self.ontology[slot][1:])
                     new_res = Act(act, slot, value)
 
                 dialog.append(new_res)

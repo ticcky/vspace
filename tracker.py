@@ -34,7 +34,7 @@ class TrackerState:
 class Tracker:
     def __init__(self, model):
         self.model = model
-        self.true_state = {slot: "None-%s" % slot for slot in self.model.slots}
+        self.true_state = {slot: self.model.ontology[slot][0] % slot for slot in self.model.slots}
         self.state = None
 
     def get_state(self): return self.state
@@ -101,7 +101,7 @@ class Tracker:
         # Build confusion tables.
         ct = {}
         for slot in self.model.slots:
-            vals = ['None'] + self.model.ontology[slot]
+            vals = self.model.ontology[slot]
             #print ct_y_true[slot]
             #print ct_y_pred[slot]
             print slot
