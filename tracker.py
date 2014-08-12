@@ -19,10 +19,10 @@ class TrackerState:
         self.best_vals = {}
         for slot, vals in self.scores.iteritems():
             score, val = min((score, val) for val, score in vals.iteritems() if score is not None)
-            if score < self.threshold:
-                self.best_vals[slot] = val
-            else:
-                self.best_vals[slot] = None
+            #if score < self.threshold:
+            self.best_vals[slot] = val
+            #else:
+            #    self.best_vals[slot] = None
 
     def iter_confusion_entries(self):
         for slot in self.scores:
@@ -41,6 +41,9 @@ class Tracker:
 
     def new_dialog(self):
         self.state = np.zeros(self.model.lat_dims)
+        last_slot_ndx = 0
+        for slot, slot_ndx in self.model.slots.iteritems():
+            self.state += self.model.u[slot_ndx]
         self.true_state = {slot: self.model.ontology[slot][0] for slot in self.model.slots}
 
     def next(self, act):
