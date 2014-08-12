@@ -161,7 +161,10 @@ class VSpace1:
 
         self.out_data['data'] = self.training_dialogs
 
-    def learning_iter(self, learning_rate, rprop):
+    def learning_iter(self, learning_rate, rprop, debug=True):
+        if debug:
+            print "> Starting learning iter"
+
         # Prepare accumulators for gradient.
         accum_loss_grad = []
         for shape in self.model.shapes:
@@ -173,9 +176,15 @@ class VSpace1:
         total_loss = 0.0
         tracker = Tracker(self.model)
         for dialog in self.training_dialogs:
+            if debug:
+                print ">> New dialog"
+
             tracker.new_dialog()
             last_state = tracker.get_state()
             for act in dialog:
+                if debug:
+                    print ">>>", unicode(act)
+
                 act_ndx = self.model.acts[act]
 
                 # Run tracker to get the new state and the true state.
