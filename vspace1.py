@@ -167,7 +167,7 @@ class VSpace1:
             new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
             for slot_name, i_slot in self.slots.iteritems():
                 #new_slot_diff = ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
-                for slot_val, slot_val_ndx in self.ontology[slot_name].iteritems():
+                for slot_val, slot_val_ndx in self.model.ontology[slot_name].iteritems():
                     new_slot_loss += ((proj(P, i_slot, s_new) * b_value[val[i_slot]])).sum() * (val[i_slot] != slot_val_ndx)
                     new_slot_loss += (((proj(P, i_slot, s_new) * b_value[val[i_slot]])).sum() - 1) * (val[i_slot] == slot_val_ndx)
                 curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[val[i_slot]])**2).sum()
