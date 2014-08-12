@@ -34,13 +34,14 @@ class TrackerState:
 class Tracker:
     def __init__(self, model):
         self.model = model
-        self.true_state = {slot: self.model.ontology[slot][0] for slot in self.model.slots}
+        self.true_state = None
         self.state = None
 
     def get_state(self): return self.state
 
     def new_dialog(self):
         self.state = np.zeros(self.model.lat_dims)
+        self.true_state = {slot: self.model.ontology[slot][0] for slot in self.model.slots}
 
     def next(self, act):
         o = self.model.acts[act]
