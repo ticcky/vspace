@@ -173,10 +173,10 @@ class Model:
     f_s_new = function([s_curr, act], s_new)
 
     # Projected state.
-    def proj(v_P, v_slot, v_state):
+    def proj(self, v_P, v_slot, v_state):
         return T.tensordot(v_P[v_slot], v_state, [[0], [0]])  # / v_P[v_slot].norm(2)
-    proj_curr = proj(P, slot, s_curr)
-    proj_new = proj(P, slot, s_new)
+    proj_curr = proj(None, P, slot, s_curr)
+    proj_new = proj(None, P, slot, s_new)
     f_proj_curr = function([s_curr, slot], proj_curr)
 
 
