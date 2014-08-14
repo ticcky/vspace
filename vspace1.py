@@ -76,11 +76,11 @@ class Model:
         #import ipdb; ipdb.set_trace()
 
         # Loss grad.
-        self.loss_grads = loss_grads = []
-        shapes = []
+        self.loss_grads = []
+        self.shapes = []
         for param in self.params:
-            shapes.append(param.shape.eval())
-            loss_grads.append(
+            self.shapes.append(param.shape.eval())
+            self.loss_grads.append(
                     function([self.s_curr, self.act, self.val],
                             T.grad(new_slot_loss, wrt=param)))
 
