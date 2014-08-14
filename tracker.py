@@ -41,8 +41,8 @@ class Tracker:
 
     def new_dialog(self):
         self.state = np.zeros(self.model.lat_dims)
-        for null in self.model.nulls:
-            self.state = self.model.f_s_new(self.state, self.model.acts[null])
+        #for null in self.model.nulls:
+        #    self.state = self.model.f_s_new(self.state, self.model.acts[null])
 
         self.true_state = {slot: self.model.ontology[slot][0] for slot in self.model.slots}
 
