@@ -49,7 +49,10 @@ class Tracker:
     def next(self, act):
         o = self.model.acts[act]
         self.state = self.model.f_s_new(self.state, o)
-        self.true_state[act.slot] = act.value
+        if act.act == "inform":
+            self.true_state[act.slot] = act.value
+        else:
+            raise NotImplemented(act.act)
         return self.state, self.true_state
 
     def decode(self):

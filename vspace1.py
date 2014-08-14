@@ -263,11 +263,6 @@ class VSpace1:
                 # Run tracker to get the new state and the true state.
                 curr_state, true_state = tracker.next(act)
 
-                # Prepare array for acummulating the gradient at this time in dialog.
-                curr_loss_grads = []
-                for shape in self.model.shapes:
-                    curr_loss_grads.append(np.zeros(shape, dtype=theano.config.floatX))
-
                 # Compute the loss & gradient of the loss.
                 val = [self.values[true_state[slot]] for slot in self.slots]
 
@@ -279,14 +274,8 @@ class VSpace1:
 
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
-                for i, param_loss_grad in enumerate(self.model.loss_grads):
-                    if debug:
-                        print act_ndx
-                    curr_loss_grads[i] += param_loss_grad(last_state, act_ndx, val)
-
-
-                for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
-                    accum += 1.0 / n_data * loss_grad
+                for param_loss_grad, accum in zip(self.model.loss_grads, accum_loss_grad):
+                    accum += 1.0 / n_data * param_loss_grad(last_state, act_ndx, val)
 
                 last_state = curr_state
 
@@ -300,11 +289,7 @@ class VSpace1:
 
         # Update the gradient.
         for acumm, param, g_rprop in zip(accum_loss_grad, self.model.params, rprop.g_rprops):
-            if param.name != "alphas":
-                c = 1.0
-            else:
-                c = -1.0
-            param.set_value(param.get_value() - c * g_rprop * (1 * np.sign(acumm)))
+            param.set_value(param.get_value() - g_rprop * (1 * np.sign(acumm)))
 
         return total_loss
 

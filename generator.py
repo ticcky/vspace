@@ -35,6 +35,7 @@ class DialogGenerator:
     ontology = {
         'from': ['f_null', 'f_nm', 'f_prg', 'f_brno', 'f_cb'],
         'to': ['t_null', 't_nm', 't_prg', 't_brno', 't_cb'],
+        'to2': ['t2_null', 't2_nm', 't2_prg', 't2_brno', 't2_cb'],
         'time': ['tm_null', '1', '2', '3'],
     }
 
