@@ -187,11 +187,11 @@ class VSpace1:
             #import ipdb; ipdb.set_trace()
 
             # Loss grad.
-            slot_loss_grads = []
+            loss_grads = []
             shapes = []
             for param in params:
                 shapes.append(param.shape.eval())
-                slot_loss_grads.append(
+                loss_grads.append(
                         function([s_curr, act, val],
                                 T.grad(new_slot_loss, wrt=param)))
 
@@ -279,8 +279,10 @@ class VSpace1:
 
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
-                for i, slot_loss_grad in enumerate(self.model.slot_loss_grads):
-                    curr_loss_grads[i] += slot_loss_grad(last_state, act_ndx, val)
+                for i, param_loss_grad in enumerate(self.model.loss_grads):
+                    if debug:
+                        print act_ndx
+                    curr_loss_grads[i] += param_loss_grad(last_state, act_ndx, val)
 
 
                 for loss_grad, accum in zip(curr_loss_grads, accum_loss_grad):
