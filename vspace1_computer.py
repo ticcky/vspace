@@ -5,15 +5,16 @@ import numpy as np
 from tracker import Tracker
 
 
-def compute_gradient((model, dialog, )):
+def compute_gradient((model, dialog, n_data, )):
     tracker = Tracker(model)
     tracker.new_dialog()
     last_state = tracker.get_state()
 
     accum_loss_grad = []
-    for shape in self.model.shapes:
+    for shape in model.shapes:
         accum_loss_grad.append(np.zeros(shape, dtype=theano.config.floatX))
 
+    total_loss = 0.0
     for act in dialog:
         act_ndx = model.acts[act]
 
@@ -30,4 +31,4 @@ def compute_gradient((model, dialog, )):
 
         last_state = curr_state
 
-    return accum_loss_grad
+    return accum_loss_grad, total_loss
