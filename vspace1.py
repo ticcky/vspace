@@ -208,7 +208,7 @@ class VSpace1:
 
     def __init__(self):
         self.out_data = {}
-        gen = DialogGenerator()
+        self.gen = DialogGenerator()
         self.training_dialogs = gen.generate_dialogs(self.dialog_cnt)
         self.acts = OrderedDict((dai, ndx) for dai, ndx in
                 zip(gen.iterate_dais(), itertools.count()))
@@ -223,7 +223,7 @@ class VSpace1:
             acts = self.acts
             values = self.values
             slots = self.slots
-            gen = gen
+            gen = self.gen
 
         self.model = Model(cfg)
 
