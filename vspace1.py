@@ -219,13 +219,7 @@ class VSpace1:
         self.slots = OrderedDict((slot, ndx) for slot, ndx in
                 zip(self.gen.iterate_slots(), itertools.count()))
 
-        class cfg:
-            acts = self.acts
-            values = self.values
-            slots = self.slots
-            gen = self.gen
-
-        self.model = Model(cfg)
+        self.model = Model(self)
 
     def learn(self, on_kbd_interrupt=None):
         learning_rate = self.learning_rate
