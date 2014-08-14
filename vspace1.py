@@ -254,11 +254,12 @@ class VSpace1:
         pool = multiprocessing.Pool(self.n_processes)
         res = pool.map(compute_gradient,
                        zip(
-                           itertools.repeat(0), #self.model),
+                           itertools.repeat(self.model),
                            self.training_dialogs,
                            itertools.repeat(n_data)
                        )
         )
+        pool.close()
         import ipdb; ipdb.set_trace()
 
         # Prepare accumulators for gradient.
