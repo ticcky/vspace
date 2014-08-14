@@ -250,23 +250,10 @@ class VSpace1:
 
         n_data = sum(len(dialog) for dialog in self.training_dialogs)
 
-        from vspace1_computer import compute_gradient
-        pool = multiprocessing.Pool(self.n_processes)
-        res = pool.map(compute_gradient,
-                       zip(
-                           itertools.repeat(0), #self.model),
-                           self.training_dialogs,
-                           itertools.repeat(n_data)
-                       )
-        )
-        pool.close()
-        import ipdb; ipdb.set_trace()
-
         # Prepare accumulators for gradient.
         accum_loss_grad = []
         for shape in self.model.shapes:
             accum_loss_grad.append(np.zeros(shape, dtype=theano.config.floatX))
-
 
 
         # Compute the gradient over the whole training data.
