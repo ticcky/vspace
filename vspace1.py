@@ -31,6 +31,170 @@ from tracker import (Tracker)
 from common import rand
 
 
+class Model:
+    def __init__(self, cfg):
+        self.ontology = cfg.gen.ontology
+        self.slots = cfg.slots
+        self.values = cfg.values
+        self.acts = cfg.acts
+        self.nulls = list(cfg.gen.iterate_nulls())
+
+        self.lat_dims = cfg.lat_dims
+        self.proj_dims = cfg.proj_dims
+
+        # Loss.
+        curr_slot_loss = 0.0  #((proj_curr - b_value[val])**2).sum()
+        new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
+        for slot_name, i_slot in self.slots.iteritems():
+            #new_slot_diff = ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
+            for slot_val in self.ontology[slot_name]:
+                slot_val_ndx = self.values[slot_val]
+
+                # Want to maximize distance of other vars.
+                new_slot_loss += T.neq(self.val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((self.proj(self.P, i_slot, self.s_new) - self.b_value[slot_val_ndx])**2).sum())
+                # Minimize distance of our vars
+                new_slot_loss += T.eq(self.val[i_slot], slot_val_ndx) * (((self.proj(self.P, i_slot, self.s_new) - self.b_value[slot_val_ndx])**2).sum())
+
+                curr_slot_loss += T.nnet.softplus(1 - ((self.proj(self.P, i_slot, self.s_curr) - self.b_value[slot_val_ndx])**2).sum()) * T.neq(self.val[i_slot], slot_val_ndx)
+                curr_slot_loss += ((self.proj(self.P, i_slot, self.s_curr) - self.b_value[slot_val_ndx])**2).sum() * T.eq(self.val[i_slot], slot_val_ndx)
+
+        self.curr_slot_loss = curr_slot_loss
+        self.new_slot_loss = new_slot_loss
+        #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
+        #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
+
+        U_val = rand(len(self.acts), self.lat_dims, self.lat_dims)
+        self.U.set_value(U_val)
+        u_val = rand(len(self.acts), self.lat_dims)
+        self.u.set_value(u_val)
+        P_val = rand(len(self.slots), self.lat_dims, self.proj_dims)
+        self.P.set_value(P_val)
+        b_val = rand(len(self.values), self.proj_dims)
+        self.b_value.set_value(b_val)
+
+        self.f_curr_slot_loss = function([self.s_curr, self.val], curr_slot_loss)
+        #import ipdb; ipdb.set_trace()
+
+        # Loss grad.
+        self.loss_grads = loss_grads = []
+        shapes = []
+        for param in self.params:
+            shapes.append(param.shape.eval())
+            loss_grads.append(
+                    function([self.s_curr, self.act, self.val],
+                            T.grad(new_slot_loss, wrt=param)))
+
+
+
+    # Current state.
+    s_curr = T.vector(name='s')
+
+    # Observation index into acts.
+    act = T.iscalar(name='act')
+
+    # Index into slots.
+    slot = T.iscalar(name='slot')
+
+    # Index into values.
+    val = T.ivector(name='val')
+
+    # Transformation matrices in the update.
+    U_val_hand = np.array([
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+    ])
+    U = theano.shared(value=U_val_hand, name="U")
+
+    # Translation vector in the update.
+    u_val_hand = np.array([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [3.0, 0.0, 0.0],
+        [4.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 2.0, 0.0],
+        [0.0, 3.0, 0.0],
+        [0.0, 4.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 2.0],
+        [0.0, 0.0, 3.0],
+        [0.0, 0.0, 4.0],
+    ])
+    u = theano.shared(value=u_val_hand, name="u")
+
+    # Projection matrix for reading the state by hyperplane projection.
+    P_val_hand = np.array([
+        [[1.0], [0.0], [0.0]],
+        [[0.0], [1.0], [0.0]],
+        [[0.0], [0.0], [1.0]],
+    ])
+    P = theano.shared(value=P_val_hand, name="P")
+
+    # Hyperplane translation vectors.
+    b_val_hand = np.array([
+        [0.0],
+        [1.0],
+        [2.0],
+        [3.0],
+        [4.0],
+        [0.0],
+        [1.0],
+        [2.0],
+        [3.0],
+        [4.0],
+        [0.0],
+        [1.0],
+        [2.0],
+        [3.0],
+        [4.0],
+    ])
+    b_value = theano.shared(value=b_val_hand, name="b")
+
+    params = [U, u, P, b_value]
+
+    # New state.
+    s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
+    f_s_new = function([s_curr, act], s_new)
+
+    # Projected state.
+    def proj(v_P, v_slot, v_state):
+        return T.tensordot(v_P[v_slot], v_state, [[0], [0]])  # / v_P[v_slot].norm(2)
+    proj_curr = proj(P, slot, s_curr)
+    proj_new = proj(P, slot, s_new)
+    f_proj_curr = function([s_curr, slot], proj_curr)
+
+
+
+
+    @classmethod
+    def save_params(cls, file_name):
+        with open(file_name, "w") as f_out:
+            f_out.write(pickle.dumps(cls.params))
+
+    @classmethod
+    def load_params(cls, file_name):
+        with open(file_name) as f_in:
+            loaded_params = pickle.loads(f_in.read())
+
+            for l_param, param in zip(loaded_params, cls.params):
+                param.set_value(l_param.get_value())
+
 
 class VSpace1:
     dialog_cnt = 100
@@ -55,161 +219,7 @@ class VSpace1:
         self.slots = OrderedDict((slot, ndx) for slot, ndx in
                 zip(gen.iterate_slots(), itertools.count()))
 
-        class Model:
-            ontology = gen.ontology
-            slots = self.slots
-            values = self.values
-            acts = self.acts
-            nulls = list(gen.iterate_nulls())
 
-            lat_dims = self.lat_dims
-            proj_dims = self.proj_dims
-
-            # Current state.
-            s_curr = T.vector(name='s')
-
-            # Observation index into acts.
-            act = T.iscalar(name='act')
-
-            # Index into slots.
-            slot = T.iscalar(name='slot')
-
-            # Index into values.
-            val = T.ivector(name='val')
-
-            # Transformation matrices in the update.
-            U_val = rand(len(acts), lat_dims, lat_dims)
-            U_val_hand = np.array([
-                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-                [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-            ])
-            U = theano.shared(value=U_val, name="U")
-
-            # Translation vector in the update.
-            u_val = rand(len(acts), lat_dims)
-            u_val_hand = np.array([
-                [0.0, 0.0, 0.0],
-                [1.0, 0.0, 0.0],
-                [2.0, 0.0, 0.0],
-                [3.0, 0.0, 0.0],
-                [4.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 2.0, 0.0],
-                [0.0, 3.0, 0.0],
-                [0.0, 4.0, 0.0],
-                [0.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0],
-                [0.0, 0.0, 2.0],
-                [0.0, 0.0, 3.0],
-                [0.0, 0.0, 4.0],
-            ])
-            u = theano.shared(value=u_val, name="u")
-
-            # Projection matrix for reading the state by hyperplane projection.
-            P_val = rand(len(slots), lat_dims, proj_dims)
-            P_val_hand = np.array([
-                [[1.0], [0.0], [0.0]],
-                [[0.0], [1.0], [0.0]],
-                [[0.0], [0.0], [1.0]],
-            ])
-            P = theano.shared(value=P_val, name="P")
-
-            # Hyperplane translation vectors.
-            b_val = rand(len(values), proj_dims)
-            b_val_hand = np.array([
-                [0.0],
-                [1.0],
-                [2.0],
-                [3.0],
-                [4.0],
-                [0.0],
-                [1.0],
-                [2.0],
-                [3.0],
-                [4.0],
-                [0.0],
-                [1.0],
-                [2.0],
-                [3.0],
-                [4.0],
-            ])
-            b_value = theano.shared(value=b_val, name="b")
-
-            alphas = theano.shared(value=np.zeros(len(self.slots)), name="alphas")
-
-            params = [U, u, P, b_value]
-
-
-            # New state.
-            s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
-            f_s_new = function([s_curr, act], s_new)
-
-            # Projected state.
-            def proj(v_P, v_slot, v_state):
-                return T.tensordot(v_P[v_slot], v_state, [[0], [0]])  # / v_P[v_slot].norm(2)
-            proj_curr = proj(P, slot, s_curr)
-            proj_new = proj(P, slot, s_new)
-            f_proj_curr = function([s_curr, slot], proj_curr)
-
-            # Loss.
-            curr_slot_loss = 0.0  #((proj_curr - b_value[val])**2).sum()
-            new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
-            for slot_name, i_slot in self.slots.iteritems():
-                #new_slot_diff = ((proj(P, i_slot, s_new) - b_value[val[i_slot]])**2).sum()
-                for slot_val in gen.ontology[slot_name]:
-                    slot_val_ndx = self.values[slot_val]
-
-                    # Want to maximize distance of other vars.
-                    new_slot_loss += T.neq(val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((proj(P, i_slot, s_new) - b_value[slot_val_ndx])**2).sum())
-                    # Minimize distance of our vars
-                    new_slot_loss += T.eq(val[i_slot], slot_val_ndx) * (((proj(P, i_slot, s_new) - b_value[slot_val_ndx])**2).sum())
-
-                    curr_slot_loss += T.nnet.softplus(1 - ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum()) * T.neq(val[i_slot], slot_val_ndx)
-                    curr_slot_loss += ((proj(P, i_slot, s_curr) - b_value[slot_val_ndx])**2).sum() * T.eq(val[i_slot], slot_val_ndx)
-
-            curr_slot_loss = curr_slot_loss
-            new_slot_loss = new_slot_loss
-            #new_slot_loss +  T.nnet.softplus(1 - (proj_new - b_value[(val + 1) % len(values)]).norm(2))
-            #loss += 0.1 * (U.norm(2) + u.norm(2) + P.norm(2) + b_value.norm(2))
-            f_curr_slot_loss = function([s_curr, val], curr_slot_loss)
-            #import ipdb; ipdb.set_trace()
-
-            # Loss grad.
-            loss_grads = []
-            shapes = []
-            for param in params:
-                shapes.append(param.shape.eval())
-                loss_grads.append(
-                        function([s_curr, act, val],
-                                T.grad(new_slot_loss, wrt=param)))
-
-
-            @classmethod
-            def save_params(cls, file_name):
-                with open(file_name, "w") as f_out:
-                    f_out.write(pickle.dumps(cls.params))
-
-            @classmethod
-            def load_params(cls, file_name):
-                with open(file_name) as f_in:
-                    loaded_params = pickle.loads(f_in.read())
-
-                    for l_param, param in zip(loaded_params, cls.params):
-                        param.set_value(l_param.get_value())
 
         self.model = Model
 
@@ -240,12 +250,10 @@ class VSpace1:
         if debug:
             print "> Starting learning iter"
 
-        from vspace1_computer import compute_gradient
-        pool = multiprocessing.Pool(self.n_processes)
-
-        res = pool.map(compute_gradient, zip(itertools.repeat(self.model), self.training_dialogs))
-
-        import ipdb; ipdb.set_trace()
+        #from vspace1_computer import compute_gradient
+        #pool = multiprocessing.Pool(self.n_processes)
+        #res = pool.map(compute_gradient, zip(itertools.repeat(self.model), self.training_dialogs))
+        #import ipdb; ipdb.set_trace()
 
         # Prepare accumulators for gradient.
         accum_loss_grad = []
@@ -310,23 +318,7 @@ def git_commit():
     os.system("git add *.py")
     os.system("git add out/*.html")
     os.system("git commit -am 'Automatic.'")
-    return
-    # Commit code to git.
-    repo = pygit2.Repository(".")
-    index = repo.index
-    index.read()
-    for python_file in [x for x in os.listdir('.') if x.endswith('.py')]:
-        index.add(python_file)
-    index.add("out/training.html")
-    index.write()
-    tree = index.write_tree()
 
-    head = repo.lookup_reference('HEAD')
-    head = head.resolve()
-
-    author = pygit2.Signature('autogit', 'autogit@zilka.me')
-    repo.create_commit('refs/heads/master', author, author, 'automatic',
-            tree, [head.target])
 
 def main():
     git_commit()
