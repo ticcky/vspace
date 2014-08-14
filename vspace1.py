@@ -35,7 +35,7 @@ class VSpace1:
     dialog_cnt = 100
     lat_dims = 5
     proj_dims = 1
-    learning_iters = 200
+    learning_iters = 20000
     learning_rate = 1.0
     rprop_plus = 1.2
     rprop_minus = 0.5
@@ -227,7 +227,7 @@ class VSpace1:
             try:
                 curr_loss = self.learning_iter(learning_rate=learning_rate, rprop=rprop)
                 self.out_data['losses'].append(curr_loss)
-                print curr_loss
+                print "#%d" % step, curr_loss
             except KeyboardInterrupt:
                 if on_kbd_interrupt is not None:
                     on_kbd_interrupt()
