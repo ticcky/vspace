@@ -34,7 +34,7 @@ from common import rand
 
 class VSpace1:
     dialog_cnt = 100
-    lat_dims = 10
+    lat_dims = 3
     proj_dims = 1
     learning_iters = 20000
     learning_rate = 1.0
