@@ -254,7 +254,7 @@ class VSpace1:
         pool = multiprocessing.Pool(self.n_processes)
         res = pool.map(compute_gradient,
                        zip(
-                           itertools.repeat(self.model),
+                           itertools.repeat(0), #self.model),
                            self.training_dialogs,
                            itertools.repeat(n_data)
                        )
