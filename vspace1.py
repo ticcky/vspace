@@ -234,7 +234,7 @@ class VSpace1:
 
         self.out_data['data'] = self.training_dialogs
 
-    def learning_iter(self, learning_rate, rprop, debug=False):
+    def learning_iter(self, learning_rate, rprop, debug=True):
         if debug:
             print "> Starting learning iter"
 
@@ -275,6 +275,7 @@ class VSpace1:
                     print ">>>> true state:", true_state
                     print ">>>> vals:", val
                     print ">>>> loss:", self.model.f_curr_slot_loss(curr_state, val)
+                    sys.stdin.readline()
 
                 total_loss += self.model.f_curr_slot_loss(curr_state, val)
 
