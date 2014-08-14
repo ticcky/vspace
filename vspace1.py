@@ -40,6 +40,7 @@ class VSpace1:
     learning_rate = 1.0
     rprop_plus = 1.2
     rprop_minus = 0.5
+    n_processes = 8
 
     def __init__(self):
         self.out_data = {}
