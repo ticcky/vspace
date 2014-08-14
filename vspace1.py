@@ -242,7 +242,7 @@ class VSpace1:
 
         from vspace1_computer import compute_gradient
         pool = multiprocessing.Pool(self.n_processes)
-        res = pool.map(compute_gradient, self.training_dialogs)
+        res = pool.map(compute_gradient, zip(itertools.repeat(self.model, self.training_dialogs)))
 
         import ipdb; ipdb.set_trace()
 
