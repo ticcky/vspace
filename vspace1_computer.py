@@ -6,6 +6,7 @@ from tracker import Tracker
 
 
 def compute_gradient((model, dialog, n_data, )):
+    return 0
     tracker = Tracker(model)
     tracker.new_dialog()
     last_state = tracker.get_state()
