@@ -209,15 +209,15 @@ class VSpace1:
     def __init__(self):
         self.out_data = {}
         self.gen = DialogGenerator()
-        self.training_dialogs = gen.generate_dialogs(self.dialog_cnt)
+        self.training_dialogs = self.gen.generate_dialogs(self.dialog_cnt)
         self.acts = OrderedDict((dai, ndx) for dai, ndx in
-                zip(gen.iterate_dais(), itertools.count()))
+                zip(self.gen.iterate_dais(), itertools.count()))
 
         self.values = OrderedDict((value, ndx) for value, ndx in
-                zip(gen.iterate_values(), itertools.count()))
+                zip(self.gen.iterate_values(), itertools.count()))
 
         self.slots = OrderedDict((slot, ndx) for slot, ndx in
-                zip(gen.iterate_slots(), itertools.count()))
+                zip(self.gen.iterate_slots(), itertools.count()))
 
         class cfg:
             acts = self.acts
