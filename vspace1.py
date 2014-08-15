@@ -291,7 +291,10 @@ class VSpace1:
                 last_state = curr_state
 
         # Update RPROP variables according to the resulting gradient.
-        for g_rprop, total_g_loss, g_history in zip(rprop.g_rprops, accum_loss_grad, rprop.g_histories):
+        for g_rprop, total_g_loss, g_history in zip(
+                rprop.g_rprops,
+                accum_loss_grad,
+                rprop.g_histories):
             g_rprop[np.where(np.sign(total_g_loss) == np.sign(g_history))] *= self.rprop_plus
             g_rprop[np.where(np.sign(total_g_loss) != np.sign(g_history))] *= self.rprop_minus
 
