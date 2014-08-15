@@ -1,13 +1,15 @@
+#!/usr/bin/env python
+# encoding: utf8
+#
+# Author: Lukas Zilka (lukas@zilka.me)
+#
+
 from collections import OrderedDict
-import copy
 import itertools
-import multiprocessing
 import os
 import pickle
-import pprint
 import random  #; random.seed(0)
 import sys
-import time
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -20,9 +22,7 @@ import progressbar
 # import pygit2
 
 import theano
-from theano import (function, pp, tensor as T)
-from theano.printing import min_informative_str
-from theano.tensor.shared_randomstreams import RandomStreams
+from theano import (function, tensor as T)
 
 # Project libs.
 import bootstrap
@@ -42,6 +42,13 @@ class Model:
         self.lat_dims = cfg.lat_dims
         self.proj_dims = cfg.proj_dims
 
+        # Projected state.
+        def proj(v_P, v_slot, v_state):
+            return T.tensordot(v_P[v_slot], v_state, [[0], [0]])  # / v_P[v_slot].norm(2)
+        self.proj_curr = proj(self.P, self.slot, self.s_curr)
+        self.proj_new = proj(self.P, self.slot, self.s_new)
+        self.f_proj_curr = function([self.s_curr, self.slot], self.proj_curr)
+
         # Loss.
         curr_slot_loss = 0.0  #((proj_curr - b_value[val])**2).sum()
         new_slot_loss = 0.0  #((proj_new - b_value[val])**2).sum()
@@ -50,13 +57,23 @@ class Model:
             for slot_val in self.ontology[slot_name]:
                 slot_val_ndx = self.values[slot_val]
 
-                # Want to maximize distance of other vars.
-                new_slot_loss += T.neq(self.val[i_slot], slot_val_ndx) * T.nnet.softplus(1 - ((self.proj(self.P, i_slot, self.s_new) - self.b_value[slot_val_ndx])**2).sum())
-                # Minimize distance of our vars
-                new_slot_loss += T.eq(self.val[i_slot], slot_val_ndx) * (((self.proj(self.P, i_slot, self.s_new) - self.b_value[slot_val_ndx])**2).sum())
+                correct = T.eq(self.val[i_slot], slot_val_ndx)
+                bias = 1 - correct
+                mult = (correct * 2 - 1)
 
-                curr_slot_loss += T.nnet.softplus(1 - ((self.proj(self.P, i_slot, self.s_curr) - self.b_value[slot_val_ndx])**2).sum()) * T.neq(self.val[i_slot], slot_val_ndx)
-                curr_slot_loss += ((self.proj(self.P, i_slot, self.s_curr) - self.b_value[slot_val_ndx])**2).sum() * T.eq(self.val[i_slot], slot_val_ndx)
+
+                # Want to maximize distance of other vars.
+                new_slot_loss += T.nnet.softplus(bias + mult * ((proj(self.P,
+                                                                 i_slot,
+                                                            self.s_new) - self.b_value[slot_val_ndx])**2).sum())
+                # Minimize distance of our vars
+                #new_slot_loss += T.eq(self.val[i_slot], slot_val_ndx) * (((
+                # proj(self.P, i_slot, self.s_new) - self.b_value[slot_val_ndx])**2).sum())
+
+                curr_slot_loss += T.nnet.softplus(bias - mult * ((proj(self.P,
+                                                                 i_slot, self.s_curr) - self.b_value[slot_val_ndx])**2).sum()) * T.neq(self.val[i_slot], slot_val_ndx)
+                #curr_slot_loss += ((proj(self.P, i_slot, self.s_curr) -
+                # self.b_value[slot_val_ndx])**2).sum() * T.eq(self.val[i_slot], slot_val_ndx)
 
         self.curr_slot_loss = curr_slot_loss
         self.new_slot_loss = new_slot_loss
@@ -73,7 +90,6 @@ class Model:
         self.b_value.set_value(b_val)
 
         self.f_curr_slot_loss = function([self.s_curr, self.val], curr_slot_loss)
-        #import ipdb; ipdb.set_trace()
 
         # Loss grad.
         self.loss_grads = []
@@ -171,16 +187,6 @@ class Model:
     # New state.
     s_new = T.tensordot(U[act], s_curr, [[0], [0]]) + u[act]
     f_s_new = function([s_curr, act], s_new)
-
-    # Projected state.
-    def proj(self, v_P, v_slot, v_state):
-        return T.tensordot(v_P[v_slot], v_state, [[0], [0]])  # / v_P[v_slot].norm(2)
-    proj_curr = proj(None, P, slot, s_curr)
-    proj_new = proj(None, P, slot, s_new)
-    f_proj_curr = function([s_curr, slot], proj_curr)
-
-
-
 
     @classmethod
     def save_params(cls, file_name):

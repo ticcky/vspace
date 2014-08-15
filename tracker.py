@@ -1,3 +1,5 @@
+# encoding: utf8
+
 import copy
 
 import numpy as np
@@ -29,6 +31,25 @@ class TrackerState:
             y_true = self.true_state[slot]
             y_pred = self.best_vals[slot]
             yield slot, y_true, y_pred
+
+
+class BasicTracker:
+    def __init__(self, ontology):
+        self.ontology = ontology
+        self.state = None
+
+    def get_state(self):
+        return self.state
+
+    def new_dialog(self):
+        self.state = {slot: vals[0] for slot, vals in self.ontology.iteritems()}
+
+    def next(self, act):
+        if act.act == "inform":
+            self.state[act.slot] = act.value
+        else:
+            raise NotImplemented(act.act)
+        return self.state
 
 
 class Tracker:

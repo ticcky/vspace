@@ -53,6 +53,7 @@ class DialogGenerator:
             for slot, vals in self.ontology.iteritems():
                 for val in vals:
                     yield Act(act, slot, val)
+        yield Act("reset", None, None)
 
     def iterate_slots(self):
         return iter(self.ontology.keys())
@@ -94,12 +95,3 @@ class DialogGenerator:
         for i in range(n_dialogs):
             res.append(self.generate_dialog(5, 1))
         return res
-
-
-def main():
-    for cnt in [10, 100]: #, 1000, 10000, 100000]:
-        np.save("dialogs.%d.npy" % cnt, generate_dialogs(cnt))
-
-
-if __name__ == '__main__':
-    main()
