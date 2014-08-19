@@ -425,7 +425,9 @@ if __name__ == '__main__':
         vspace.visualize("out/vspace2.html")
 
     def rprop_reset():
-        vspace.grads_rprop.set_value(1.0)
+        for param, rprop_grad in zip(vspace.model.get_params(),
+                                     vspace.grads_rprop):
+            rprop_grad.set_value(ones(param.shape.eval()) * vspace.learning_rate)
 
     def ipdb_invoke():
         import ipdb; ipdb.set_trace()
