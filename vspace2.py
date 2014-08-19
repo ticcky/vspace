@@ -127,7 +127,7 @@ class Model:
 
 
 class VSpace1:
-    dialog_cnt = 100
+    dialog_cnt = 500
     lat_dims = 10
     proj_dims = 1
     learning_rate = 2.0
@@ -407,7 +407,15 @@ class VSpace1:
 
 
 
+def git_commit():
+    os.system("git add *.py")
+    os.system("git add out/*.html")
+    os.system("git commit -am 'Automatic.'")
+
+
 if __name__ == '__main__':
+    git_commit()
+
     vspace = VSpace1(learning_iters=1000)
     def save():
         vspace.visualize("out/vspace2.html")

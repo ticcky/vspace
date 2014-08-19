@@ -54,7 +54,7 @@ th.conft-val {
 {% endfor %}
 </ol>
 
-{% for param in model.params %}
+{% for param in model.get_params() %}
 <h4>{{param.name}}</h4>
 <pre>
 {{param.get_value()}}
