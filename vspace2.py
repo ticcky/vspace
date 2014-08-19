@@ -420,10 +420,13 @@ if __name__ == '__main__':
     def save():
         vspace.visualize("out/vspace2.html")
 
+    def ipdb_invoke():
+        import ipdb; ipdb.set_trace()
+
 
 
     vspace.prepare_training()
-    vspace.train(ctrl_c_hook=save)
+    vspace.train(ctrl_c_hook=ipdb_invoke)
 
     save()
 
