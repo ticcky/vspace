@@ -81,7 +81,7 @@ class Model:
         u_act = u[a]
         return T.tensordot(
             U_act,
-            theano.gradient.consider_constant(last_state), [[0], [0]]
+            last_state, [[0], [0]]
         ) + u_act
 
     def proj_fn(self, slot_ndx, state, P):
@@ -242,7 +242,7 @@ class VSpace1:
         self.shapes = []
         grads = []
         grads_history = []
-        grads_rprop = []
+        self.grads_rprop = grads_rprop = []
         grads_rprop_new = []
         for param in self.model.get_params():
             print 'param', param.name
