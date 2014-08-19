@@ -61,7 +61,7 @@ class Tracker:
     def get_state(self): return self.state
 
     def new_dialog(self):
-        self.state = np.zeros(self.model.lat_dims)
+        self.state = np.zeros(self.model.lat_dims).astype(theano.config.floatX)
         #for null in self.model.nulls:
         #    self.state = self.model.f_s_new(self.state, self.model.acts[null])
 
@@ -87,7 +87,7 @@ class Tracker:
             scores = {}
             for val in self.model.ontology[slot]:
                 val_ndx = self.model.values[val]
-                val_vector = self.model.b_value.get_value()[val_ndx]
+                val_vector = self.model.b.get_value()[val_ndx]
 
                 scores[val] = np.linalg.norm(val_vector - proj_vector, 2)
 

@@ -8,6 +8,7 @@ import os
 import pickle
 import random  #; random.seed(0)
 import sys
+import time
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -32,7 +33,24 @@ from common import rand
 floatx = theano.config.floatX
 
 
+# Helper functions
+def urand(*args):
+    return np.random.rand(*args).astype(theano.config.floatX)
+
+def ones(shape):
+    return np.ones(shape).astype(theano.config.floatX)
+
+def zeros(shape):
+    return np.zeros(shape).astype(theano.config.floatX)
+
+
 class Model:
+    acts = None
+    slots = None
+    values = None
+
+    f_s_new = None
+
     # Current state.
     s_curr = T.vector(name='s')
 
@@ -57,6 +75,53 @@ class Model:
     # Hyperplane translation vectors.
     b = None  #theano.shared(value=None, name="b")
 
+    def next_state_fn(self, a, last_state, U, u):
+        U_act = U[a]
+        u_act = u[a]
+        return T.tensordot(U_act, last_state, [[0], [0]]) + u_act
+
+    def proj_fn(self, slot_ndx, state, P):
+        return T.tensordot(P[slot_ndx], state, [[0], [0]])
+
+    def __init__(self, n_data, lat_dims, proj_dims, ontology, acts, slots, \
+                                                            values):
+        # Store parameters in the model.
+        self.n_data = n_data
+        self.lat_dims = lat_dims
+        self.proj_dims = proj_dims
+        self.ontology = ontology
+        self.acts = acts
+        self.slots = slots
+        self.values = values
+
+        # Initialize the other model parameters.
+        reset_act = acts[Act("reset", None, None)]
+
+        U_val = urand(len(acts), lat_dims, lat_dims)
+        U_val[reset_act] = 0.0
+        U_val *= 1.0 / n_data
+        self.U = theano.shared(value=U_val, name="U")
+
+        u_val = urand(len(acts), lat_dims)
+        u_val[reset_act] = 0.0
+        u_val /= lat_dims
+        self.u = theano.shared(value=u_val, name="u")
+
+        P_val = urand(len(slots), lat_dims, proj_dims)
+        self.P = theano.shared(value=P_val, name="P")
+
+        b_val = urand(len(values), proj_dims)
+        self.b = theano.shared(value = b_val, name="b")
+
+        a = T.iscalar(name="a")
+        state = T.vector(name="state")
+        state_new = self.next_state_fn(a, state, self.U, self.u)
+        self.f_s_new = function([state, a], state_new)
+
+        slot = T.iscalar(name="slot")
+        proj = self.proj_fn(slot, state, self.P)
+        self.f_proj_curr = function([state, slot], proj)
+
     def get_params(self):
         return [self.U, self.u, self.P, self.b]
 
@@ -65,36 +130,31 @@ class VSpace1:
     dialog_cnt = 100
     lat_dims = 10
     proj_dims = 1
-    learning_iters = 20000
-    learning_rate = 0.1
+    learning_rate = 2.0
     rprop_plus = 1.2
     rprop_minus = 0.5
 
-    def __init__(self):
+    learning_iters = None
+
+    values = None
+    slots = None
+    training_metrics = None
+
+    def __init__(self, learning_iters):
+        self.learning_iters = learning_iters
+
         # Generate some dialogs and prepare training data.
         self.gen = DialogGenerator()
-        self.acts = None
-        self.values = None
-        self.slots = None
-        self.prepare_data()
+        acts, values, slots = self.prepare_data()
 
         # Create new model.
-        self.model = Model()
-
-        reset_act = self.acts[Act("reset", None, None)]
-
-        U_val = self.urand(len(self.acts), self.lat_dims, self.lat_dims)
-        U_val[reset_act] = 0.0
-        U_val *= 1.0 / len(self.training_labels)
-        self.model.U = theano.shared(value=U_val, name="U")
-        u_val = self.urand(len(self.acts), self.lat_dims)
-        u_val[reset_act] = 0.0
-        u_val /= self.lat_dims
-        self.model.u = theano.shared(value=u_val, name="u")
-        P_val = self.urand(len(self.slots), self.lat_dims, self.proj_dims)
-        self.model.P = theano.shared(value=P_val, name="P")
-        b_val = self.urand(len(self.values), self.proj_dims)
-        self.model.b = theano.shared(value = b_val, name="b")
+        self.model = Model(n_data=len(self.training_labels),
+                           lat_dims=self.lat_dims,
+                           proj_dims=self.proj_dims,
+                           ontology=self.gen.ontology,
+                           acts=acts,
+                           values=values,
+                           slots=slots)
 
         """s = self.zeros(self.lat_dims)
         for i, a in enumerate(self.training_acts):
@@ -103,29 +163,28 @@ class VSpace1:
 
         import ipdb; ipdb.set_trace()"""
 
+    def prepare_training(self):
         data_cnt = len(self.training_labels)
 
         t_acts = T.ivector(name="t_acts")
 
         # Build the progression of states.
         s0 = T.as_tensor_variable(np.asarray(np.zeros(self.lat_dims), floatx))
-        def next_state_fn(a, last_state, U, u):
-            U_act = U[a]
-            u_act = u[a]
-            return T.tensordot(U_act, last_state, [[0], [0]]) + u_act
 
-        states, updates = theano.scan(next_state_fn,
+
+        states, updates = theano.scan(self.model.next_state_fn,
                              sequences=[t_acts],
                              non_sequences=[self.model.U,
                                             self.model.u],
                              outputs_info=[s0]
                          )
 
+
         states_projection = T.tensordot(self.model.P, states, [[1], [1]])
         states_projectionx = states_projection.dimshuffle(2, 0, 1)
 
-        fn_states_projectionx = function([t_acts], states_projectionx)
-        print fn_states_projectionx(self.training_acts)
+        #fn_states_projectionx = function([t_acts], states_projectionx)
+        #print fn_states_projectionx(self.training_acts)
         #import ipdb; ipdb.set_trace()
         # P: 4slots, 10latdims, 1projdim
         # states: 36data, 10latdims
@@ -142,11 +201,11 @@ class VSpace1:
         #import ipdb; ipdb.set_trace()
         def loss_fn(proj, data, b, data_cnt):
             loss = 0.0
-            for slot, slot_ndx in self.slots.iteritems():
+            for slot, slot_ndx in self.model.slots.iteritems():
                 #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
                 #continue
                 for val in self.gen.ontology[slot]:
-                    val_ndx = self.values[val]
+                    val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
                     loss += T.eq(data[slot_ndx], val_ndx) * score
                     loss += T.neq(data[slot_ndx], val_ndx) * \
@@ -166,11 +225,11 @@ class VSpace1:
         )
 
         total_loss = losses.mean()
-        f_losses = function([t_acts, t_labels], losses)
-        print f_losses(self.training_acts, self.training_labels)
+        #f_losses = function([t_acts, t_labels], losses)
+        #print f_losses(self.training_acts, self.training_labels)
 
-        f_total_loss = function([t_acts, t_labels], total_loss)
-        print f_total_loss(self.training_acts, self.training_labels)
+        #f_total_loss = function([t_acts, t_labels], total_loss)
+        #print f_total_loss(self.training_acts, self.training_labels)
 
         #import ipdb; ipdb.set_trace()
 
@@ -189,13 +248,13 @@ class VSpace1:
             grads.append(grad)
 
             # Save gradients histories for RProp.
-            grad_hist = theano.shared(self.ones(shape), name="%s_hist" % param)
+            grad_hist = theano.shared(ones(shape), name="%s_hist" % param)
             grads_history.append(
                 grad_hist
             )
 
             # Create variables where rprop rates will be stored.
-            grad_rprop = theano.shared(self.ones(shape) * self.learning_rate,
+            grad_rprop = theano.shared(ones(shape) * self.learning_rate,
                                   name="%s_rprop" % param)
             grads_rprop.append(grad_rprop)
 
@@ -209,7 +268,7 @@ class VSpace1:
 
 
         # Build training function.
-        self.train = function(
+        self._train = function(
             inputs=[t_acts, t_labels],
             outputs=[total_loss, grads[3]],
             updates=[
@@ -229,50 +288,98 @@ class VSpace1:
             ]
         )
 
+    def train(self, ctrl_c_hook=None):
+        self.training_metrics = {}
+        self.training_metrics['begin'] = time.time()
+        self.training_metrics['losses'] = losses = []
+
         print '>> Training:'
-        for i in range(1000):
-            train_res = self.train(self.training_acts, self.training_labels)
-            print i, "loss:", float(train_res[0])
+        for i in range(self.learning_iters):
+            try:
+                train_res = self._train(self.training_acts, self.training_labels)
+                loss = float(train_res[0])
+                losses.append(loss)
+                print i, "loss:", loss
+            except KeyboardInterrupt:
+                if ctrl_c_hook is not None:
+                    ctrl_c_hook()
+
             #print train_res[1]
             #print grads_rprop[3].get_value()
             #print self.model.b.get_value()
 
-
+        self.training_metrics['end'] = time.time()
         #print self.loss_grads[3](self.training_acts, self.training_labels)
         #import ipdb; ipdb.set_trace()
 
-    def urand(self, *args):
-        return np.random.rand(*args).astype(theano.config.floatX)
+    def visualize(self, out_filename="out/training_bs.html"):
+        tracker = Tracker(self.model)
+        tracker.simulate(self.training_dialogs)
 
-    def ones(self, shape):
-        return np.ones(shape).astype(theano.config.floatX)
+        # Do bootstrap for the confusion table.
+        n_bs = 1
+        widgets = [progressbar.Percentage(),
+                   ' ', progressbar.Bar(),
+                   ' ', progressbar.ETA(),
+                   ' ', progressbar.AdaptiveETA()]
+        bs_progress = progressbar.ProgressBar(widgets=widgets).start()
 
-    def zeros(self, shape):
-        return np.zeros(shape).astype(theano.config.floatX)
+        cts = []
+        for bs_iter in bs_progress(range(n_bs)):
+            n_dialogs = len(self.training_dialogs)
+            if n_bs > 1:
+                dataset = [random.choice(self.training_dialogs) for _ in range(
+                    n_dialogs)]
+            else:
+                dataset = self.training_dialogs
 
-    def ndxify_state(self, state):
-        return [self.values[state[slot]] for slot in self.slots]
+            tracker = Tracker(self.model)
+            tracker.simulate(dataset)
+            cts.append(tracker.out_data['confusion_tables'])
+
+        ct = bootstrap.from_all_confusion_tables(cts)
+
+        context = {}
+        context['tracker'] = tracker.out_data
+        context['bootstrap_ct'] = ct
+        context['model'] = self.model
+        context['training_metrics'] = self.training_metrics
+        context['training_data'] = self.training_dialogs
+        env = Environment(loader=FileSystemLoader('tpl'))
+        env.globals.update(zip=zip)
+
+        tpl = env.get_template('training.html')
+        with open(out_filename, "w") as f_out:
+            f_out.write(tpl.render(**context))
+
+
+
+    def ndxify_state(self, state, slots, values):
+        return [values[state[slot]] for slot in slots]
 
 
     def prepare_data(self):
         """Build training data from training dialogs."""
 
         # Build mapping of items from the generated dialogs to indexes.
-        self.acts = OrderedDict((dai, ndx) for dai, ndx in
+        acts = OrderedDict((dai, ndx) for dai, ndx in
                 zip(self.gen.iterate_dais(), itertools.count()))
 
-        self.values = OrderedDict((value, ndx) for value, ndx in
+        values = OrderedDict((value, ndx) for value, ndx in
                 zip(self.gen.iterate_values(), itertools.count()))
 
-        self.slots = OrderedDict((slot, ndx) for slot, ndx in
+        slots = OrderedDict((slot, ndx) for slot, ndx in
                 zip(self.gen.iterate_slots(), itertools.count()))
 
         tracker = BasicTracker(self.gen.ontology)
         tracker.new_dialog()
-        blank_state = self.ndxify_state(tracker.get_state())
-        reset_act = self.acts[Act("reset", None, None)]
+        blank_state = self.ndxify_state(state=tracker.get_state(),
+                                        slots=slots,
+                                        values=values)
+        reset_act = acts[Act("reset", None, None)]
 
-        training_dialogs = self.gen.generate_dialogs(self.dialog_cnt)
+        self.training_dialogs = training_dialogs = self.gen.generate_dialogs(
+            self.dialog_cnt)
 
         training_acts = []
         training_labels = []
@@ -281,9 +388,11 @@ class VSpace1:
 
             for dai in dialog:
                 true_state = tracker.next(dai)
-                true_state_ndx = self.ndxify_state(true_state)
+                true_state_ndx = self.ndxify_state(state=true_state,
+                                                   slots=slots,
+                                                   values=values)
 
-                training_acts.append(self.acts[dai])
+                training_acts.append(acts[dai])
                 training_labels.append(true_state_ndx)
 
             # Insert reset after each dialog so that the whole training data
@@ -294,10 +403,22 @@ class VSpace1:
         self.training_acts = np.asarray(training_acts, dtype=np.int32)
         self.training_labels= np.asarray(training_labels, dtype=np.int32)
 
+        return (acts, values, slots)
+
 
 
 if __name__ == '__main__':
-    VSpace1()
+    vspace = VSpace1(learning_iters=1000)
+    def save():
+        vspace.visualize("out/vspace2.html")
+
+
+
+    vspace.prepare_training()
+    vspace.train(ctrl_c_hook=save)
+
+    save()
+
 
 
 """TRASH

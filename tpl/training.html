@@ -62,7 +62,7 @@ th.conft-val {
 {% endfor %}
 
 <h3>Losses</h3>
-{{vspace.losses}}
+{{training_metrics.losses}}
 
 <h3>Tracker</h3>
 {% for dialog in tracker.simulation %}
@@ -111,7 +111,7 @@ th.conft-val {
 {% endfor %}
 
 <h3>Training Data</h3>
-{% for dialog in vspace.data %}
+{% for dialog in training_data %}
 <table>
   <tr>
     <th>Dialog</th>
