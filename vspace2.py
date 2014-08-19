@@ -427,7 +427,7 @@ if __name__ == '__main__':
     def rprop_reset():
         for param, rprop_grad in zip(vspace.model.get_params(),
                                      vspace.grads_rprop):
-            rprop_grad.set_value(ones(param.shape.eval()) * vspace.learning_rate)
+            rprop_grad.set_value(rprop_grad.get_value() * 10.0)
 
     def ipdb_invoke():
         import ipdb; ipdb.set_trace()
