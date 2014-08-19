@@ -21,6 +21,7 @@ import progressbar
 # import pygit2
 
 import theano
+import theano.gradient
 from theano import (function, tensor as T)
 
 # Project libs.
@@ -78,7 +79,10 @@ class Model:
     def next_state_fn(self, a, last_state, U, u):
         U_act = U[a]
         u_act = u[a]
-        return T.tensordot(U_act, last_state, [[0], [0]]) + u_act
+        return T.tensordot(
+            U_act,
+            theano.gradient.consider_constant(last_state), [[0], [0]]
+        ) + u_act
 
     def proj_fn(self, slot_ndx, state, P):
         return T.tensordot(P[slot_ndx], state, [[0], [0]])
