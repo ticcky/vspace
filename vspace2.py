@@ -308,6 +308,7 @@ class VSpace1:
                 print i, "loss:", loss
                 print 'grads U:', rprop_grads_U
                 print 'grads u:', rprop_grads_u
+                print
             except KeyboardInterrupt:
                 if ctrl_c_hook is not None:
                     ctrl_c_hook()
