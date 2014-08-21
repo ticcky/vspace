@@ -432,7 +432,7 @@ def git_commit():
 if __name__ == '__main__':
     git_commit()
 
-    vspace = VSpace1(learning_iters=1000)
+    vspace = VSpace1(learning_iters=10000)
     def save():
         vspace.visualize("out/vspace2.html")
 
