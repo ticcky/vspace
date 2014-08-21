@@ -213,7 +213,7 @@ class VSpace1:
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
                 score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
-                loss += T.tanh(score)
+                loss += score #T.tanh(score)
 
                 # Loss for giving credit to randomly selected others.
                 for val in random.sample(self.gen.ontology[slot], 30):
