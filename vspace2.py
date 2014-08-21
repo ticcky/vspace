@@ -224,11 +224,11 @@ class VSpace1:
 
             return loss * weight
 
-        t_labels = T.imatrix(name="t_labels")
+        #t_labels = T.imatrix(name="t_labels")
         t_weights = T.vector(name="t_weights")
         losses, updates = theano.scan(loss_fn,
                                       sequences=[states_projectionx,
-                                                 t_labels, t_weights],
+                                                 self.training_labels, t_weights],
                                       #states_projectionx,
                                       #T.as_tensor_variable(
                                       # self.training_labels)],
@@ -282,7 +282,7 @@ class VSpace1:
 
         # Build training function.
         self._train = function(
-            inputs=[t_acts, t_labels, t_weights],
+            inputs=[t_acts, t_weights],
             outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
                      grads_rprop_new[1]],
             updates=[
@@ -311,7 +311,7 @@ class VSpace1:
         for i in range(self.learning_iters):
             try:
                 loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
-                    self._train(self.training_acts, self.training_labels,
+                    self._train(self.training_acts, #self.training_labels,
                                 self.training_weights)
 
                 losses.append(loss)
