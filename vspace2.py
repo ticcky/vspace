@@ -142,7 +142,7 @@ class VSpace1:
     lat_dims = 10
     proj_dims = 1
     learning_rate = 0.1
-    rprop_plus = 1.2
+    rprop_plus = 1.9
     rprop_minus = 0.5
 
     learning_iters = None
