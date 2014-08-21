@@ -274,7 +274,7 @@ class VSpace1:
         # Build training function.
         self._train = function(
             inputs=[t_acts, t_labels],
-            outputs=[total_loss, grads, rg],
+            outputs=[total_loss, grads, grads_rprop_new],
             updates=[
                 # Update parameters according to the RProp update rule.
                 #(p, p - lr * g) for p, g in zip(self.model.get_params(), grads)
