@@ -136,7 +136,7 @@ class Model:
 
 
 class VSpace1:
-    dialog_cnt = 1000
+    dialog_cnt = 100
     lat_dims = 10
     proj_dims = 1
     learning_rate = 0.1
@@ -212,7 +212,8 @@ class VSpace1:
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
-                loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                loss += T.tanh(score)
 
                 # Loss for giving credit to randomly selected others.
                 for val in random.sample(self.gen.ontology[slot], 4):
