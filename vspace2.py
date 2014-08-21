@@ -228,7 +228,9 @@ class VSpace1:
         t_weights = T.vector(name="t_weights")
         losses, updates = theano.scan(loss_fn,
                                       sequences=[states_projectionx,
-                                                 self.training_labels, t_weights],
+                                                 T.as_tensor_variable(
+                                                     self.training_labels),
+                                                 t_weights],
                                       #states_projectionx,
                                       #T.as_tensor_variable(
                                       # self.training_labels)],
