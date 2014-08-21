@@ -210,7 +210,7 @@ class VSpace1:
         #        -self.model.b_value.dimshuffle('x', 0, 1))
         # Udelat pro kazdy slot jiny.
         #import ipdb; ipdb.set_trace()
-        def loss_fn(proj, data, b, data_cnt):
+        def loss_fn(proj, data, weight, b, data_cnt):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
@@ -222,11 +222,13 @@ class VSpace1:
                     loss += T.neq(data[slot_ndx], val_ndx) * \
                             T.nnet.softplus(1 - score)
 
-            return loss
+            return loss * weight
 
         t_labels = T.imatrix(name="t_labels")
+        t_weights = T.imatrix(name="t_weights")
         losses, updates = theano.scan(loss_fn,
-                                      sequences=[states_projectionx, t_labels],
+                                      sequences=[states_projectionx,
+                                                 t_labels, t_weights],
                                       #states_projectionx,
                                       #T.as_tensor_variable(
                                       # self.training_labels)],
@@ -280,7 +282,7 @@ class VSpace1:
 
         # Build training function.
         self._train = function(
-            inputs=[t_acts, t_labels],
+            inputs=[t_acts, t_labels, t_weights],
             outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
                      grads_rprop_new[1]],
             updates=[
@@ -309,7 +311,8 @@ class VSpace1:
         for i in range(self.learning_iters):
             try:
                 loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
-                    self._train(self.training_acts, self.training_labels)
+                    self._train(self.training_acts, self.training_labels,
+                                self.training_weights)
 
                 losses.append(loss)
                 print i, "loss:", loss
@@ -399,10 +402,11 @@ class VSpace1:
 
         training_acts = []
         training_labels = []
+        training_weights = []
         for dialog in training_dialogs:
             tracker.new_dialog()
 
-            for dai in dialog:
+            for i, dai in enumerate(dialog):
                 true_state = tracker.next(dai)
                 true_state_ndx = self.ndxify_state(state=true_state,
                                                    slots=slots,
@@ -410,6 +414,11 @@ class VSpace1:
 
                 training_acts.append(acts[dai])
                 training_labels.append(true_state_ndx)
+                if i > 2:
+                    training_weights.append(1.0)
+                else:
+                    training_weights.append(0.0)
+
 
             # Insert reset after each dialog so that the whole training data
             # can be modelled like one sequence.
@@ -418,6 +427,8 @@ class VSpace1:
 
         self.training_acts = np.asarray(training_acts, dtype=np.int32)
         self.training_labels= np.asarray(training_labels, dtype=np.int32)
+        self.training_weights = np.asarray(training_weights, dtype=floatx)
+
 
         return (acts, values, slots)
 
