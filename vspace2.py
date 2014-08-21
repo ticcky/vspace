@@ -436,8 +436,8 @@ class VSpace1:
                                                self.gen.ontology)))
         for slot, vals in self.gen.ontology.iteritems():
             for i, val in enumerate(vals):
-                print slots[slot], i, val, vals[val]
-                t_ontology[slots[slot]][i] = vals[val]
+                print slots[slot], i, val, values[val]
+                t_ontology[slots[slot]][i] = values[val]
 
         self.training_ontology = np.asarray(t_ontology, dtype=np.int32)
         import ipdb; ipdb.set_trace()
