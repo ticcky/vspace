@@ -285,7 +285,7 @@ class VSpace1:
 
         # Build training function.
         self._train = function(
-            inputs=[t_acts, t_labels, t_weights],
+            inputs=[t_acts, t_labels, t_weights, t_ontology],
             outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
                      grads_rprop_new[1]],
             updates=[
@@ -314,8 +314,10 @@ class VSpace1:
         for i in range(self.learning_iters):
             try:
                 loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
-                    self._train(self.training_acts, self.training_labels,
-                                self.training_weights)
+                    self._train(self.training_acts,
+                                self.training_labels,
+                                self.training_weights,
+                                self.training_ontology)
 
                 losses.append(loss)
                 print i, "loss:", loss
@@ -440,7 +442,6 @@ class VSpace1:
                 t_ontology[slots[slot]][i] = values[val]
 
         self.training_ontology = np.asarray(t_ontology, dtype=np.int32)
-        import ipdb; ipdb.set_trace()
 
         return (acts, values, slots)
 
