@@ -208,13 +208,13 @@ class VSpace1:
         #        -self.model.b_value.dimshuffle('x', 0, 1))
         # Udelat pro kazdy slot jiny.
         #import ipdb; ipdb.set_trace()
-        def loss_fn(proj, data, weight, b, data_cnt):
+        def loss_fn(proj, data, weight, b, data_cnt, ontology):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
                 #continue
 
-                for val in [self.gen.ontology[slot][data[slot_ndx]]] + random.sample(
+                for val in [ontology[slot_ndx][data[slot_ndx]]] + random.sample(
                         self.gen.ontology[slot][1:], 4):
                     val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
@@ -224,19 +224,20 @@ class VSpace1:
 
             return loss * weight
 
-        #t_labels = T.imatrix(name="t_labels")
+        t_labels = T.imatrix(name="t_labels")
+        t_ontology = T.imatrix(name="t_ontology")
         t_weights = T.vector(name="t_weights")
         losses, updates = theano.scan(loss_fn,
                                       sequences=[states_projectionx,
-                                                 T.as_tensor_variable(
-                                                     self.training_labels),
+                                                 t_labels,
                                                  t_weights],
                                       #states_projectionx,
                                       #T.as_tensor_variable(
                                       # self.training_labels)],
                                       non_sequences=[
                                                      self.model.b,
-                                                     data_cnt]
+                                                     data_cnt,
+                                                     t_ontology]
         )
 
         total_loss = losses.mean()
@@ -284,7 +285,7 @@ class VSpace1:
 
         # Build training function.
         self._train = function(
-            inputs=[t_acts, t_weights],
+            inputs=[t_acts, t_labels, t_weights],
             outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
                      grads_rprop_new[1]],
             updates=[
@@ -313,7 +314,7 @@ class VSpace1:
         for i in range(self.learning_iters):
             try:
                 loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
-                    self._train(self.training_acts, #self.training_labels,
+                    self._train(self.training_acts, self.training_labels,
                                 self.training_weights)
 
                 losses.append(loss)
@@ -431,6 +432,14 @@ class VSpace1:
         self.training_labels= np.asarray(training_labels, dtype=np.int32)
         self.training_weights = np.asarray(training_weights, dtype=floatx)
 
+        t_ontology = np.zeros((len(slots), max(len(x) for x in
+                                               self.gen.ontology)))
+        for slot, values in self.model.ontology:
+            for i, val in enumerate(values):
+                t_ontology[slots[slot]][i] = values[val]
+
+        self.training_ontology = np.asarray(t_ontology, dtype=np.int32)
+        import ipdb; ipdb.set_trace()
 
         return (acts, values, slots)
 
