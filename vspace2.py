@@ -433,7 +433,7 @@ class VSpace1:
         self.training_weights = np.asarray(training_weights, dtype=floatx)
 
         t_ontology = np.zeros((len(slots), max(len(x) for x in
-                                               self.gen.ontology)))
+                                               self.gen.ontology.values())))
         for slot, vals in self.gen.ontology.iteritems():
             for i, val in enumerate(vals):
                 print slots[slot], i, val, values[val]
