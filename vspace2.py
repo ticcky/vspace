@@ -220,7 +220,8 @@ class VSpace1:
 
                 score = ((proj[slot_ndx] - b[data[slot_ndx] + 1])**2).sum()
                 loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx],
-                                                           len(self.values) - 1)
+                                                           len(
+                                                               self.model.values) - 1)
 
                 # Loss for giving credit to randomly selected others.
                 #for val in random.sample(self.gen.ontology[slot], 20):
