@@ -274,7 +274,8 @@ class VSpace1:
         # Build training function.
         self._train = function(
             inputs=[t_acts, t_labels],
-            outputs=[total_loss, grads, grads_rprop_new],
+            outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
+                     grads_rprop_new[1]],
             updates=[
                 # Update parameters according to the RProp update rule.
                 #(p, p - lr * g) for p, g in zip(self.model.get_params(), grads)
@@ -300,12 +301,13 @@ class VSpace1:
         print '>> Training:'
         for i in range(self.learning_iters):
             try:
-                loss, grads, rpop_grads = self._train(self.training_acts,
-                                        self.training_labels)
+                loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
+                    self._train(self.training_acts, self.training_labels)
 
                 losses.append(loss)
                 print i, "loss:", loss
-                print 'grads:', rprop_grads
+                print 'grads U:', rprop_grads_U
+                print 'grads u:', rprop_grads_u
             except KeyboardInterrupt:
                 if ctrl_c_hook is not None:
                     ctrl_c_hook()
