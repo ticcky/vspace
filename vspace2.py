@@ -211,19 +211,14 @@ class VSpace1:
         def loss_fn(proj, data, weight, b, data_cnt, ontology):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
-                #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
-                #continue
+                # Loss for not getting right the correct slot.
+                loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
 
-                for val in [ontology[slot_ndx][data[slot_ndx]]] + random.sample(
-                        self.gen.ontology[slot][1:], 4):
-                    if type(val) is str:
-                        val_ndx = self.model.values[val]
-                    else:
-                        val_ndx = val
+                # Loss for giving credit to randomly selected others.
+                for val in random.sample(self.gen.ontology[slot], 4):
+                    val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
-                    loss += T.eq(data[slot_ndx], val_ndx) * score
-                    loss += T.neq(data[slot_ndx], val_ndx) * \
-                            T.nnet.softplus(1 - score)
+                    loss += T.nnet.softplus(1 - score)
 
             return loss * weight
 
