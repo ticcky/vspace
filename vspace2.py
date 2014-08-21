@@ -81,7 +81,7 @@ class Model:
         u_act = u[a]
         return T.tensordot(
             U_act,
-            last_state, [[0], [0]]
+            T.consider_constant(last_state), [[0], [0]]
         ) + u_act
 
     def proj_fn(self, slot_ndx, state, P):
