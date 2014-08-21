@@ -81,7 +81,7 @@ class Model:
         u_act = u[a]
         return T.tensordot(
             U_act,
-            T.consider_constant(last_state), [[0], [0]]
+            (last_state), [[0], [0]]
         ) + u_act
 
     def proj_fn(self, slot_ndx, state, P):
@@ -306,9 +306,9 @@ class VSpace1:
 
                 losses.append(loss)
                 print i, "loss:", loss
-                print 'grads U:', rprop_grads_U
-                print 'grads u:', rprop_grads_u
-                print
+                #print 'grads U:', rprop_grads_U
+                #print 'grads u:', rprop_grads_u
+                #print
             except KeyboardInterrupt:
                 if ctrl_c_hook is not None:
                     ctrl_c_hook()

@@ -58,7 +58,7 @@ th.conft-val {
 <h4>{{param.name}}</h4>
 {% if param.name == "b" %}
 <pre>
-{% for val, p in zip(model.values, param) %}
+{% for val, p in zip(model.values, param.get_value()) %}
 {{val}}: {{p}}
 {% endfor %}
 </pre>
