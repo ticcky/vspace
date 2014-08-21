@@ -436,6 +436,7 @@ class VSpace1:
                                                self.gen.ontology)))
         for slot, values in self.gen.ontology:
             for i, val in enumerate(values):
+                print slots[slot], i, val
                 t_ontology[slots[slot]][i] = values[val]
 
         self.training_ontology = np.asarray(t_ontology, dtype=np.int32)
