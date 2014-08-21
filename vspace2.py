@@ -215,12 +215,21 @@ class VSpace1:
                 score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
                 loss += score #T.tanh(score)
 
+                score = ((proj[slot_ndx] - b[T.max(data[slot_ndx] -
+                                                   1, 0)])**2).sum()
+                loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx], 0)
+
+                score = ((proj[slot_ndx] - b[(T.min(data[slot_ndx] + 1),
+                                             len(self.values) - 1)])**2).sum()
+                loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx],
+                                                           len(self.values) - 1)
+
                 # Loss for giving credit to randomly selected others.
-                for val in random.sample(self.gen.ontology[slot], 20):
-                    val_ndx = self.model.values[val]
-                    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
-                    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
-                                                               data[slot_ndx])
+                #for val in random.sample(self.gen.ontology[slot], 20):
+                #    val_ndx = self.model.values[val]
+                #    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
+                #    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
+                #                                               data[slot_ndx])
 
             return loss * weight
 
