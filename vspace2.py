@@ -119,8 +119,8 @@ class Model:
         for slot in self.slots:
             curr_b = 0.0
             for val in self.ontology[slot]:
-                curr_b += 2.5
                 b_val.append(curr_b)
+                curr_b += 2.5
         b_val = np.array(b_val).astype(floatx)
         self.b = theano.shared(value = b_val, name="b")
 
