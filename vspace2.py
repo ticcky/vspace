@@ -1,7 +1,5 @@
 # encoding: utf8
 
-# !!! NEFUNGUJE GRADIENT KDYZ JE DIALOG CNT > 3
-
 from collections import OrderedDict
 import itertools
 import os
