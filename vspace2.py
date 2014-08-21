@@ -225,7 +225,7 @@ class VSpace1:
             return loss * weight
 
         t_labels = T.imatrix(name="t_labels")
-        t_weights = T.imatrix(name="t_weights")
+        t_weights = T.vector(name="t_weights")
         losses, updates = theano.scan(loss_fn,
                                       sequences=[states_projectionx,
                                                  t_labels, t_weights],
