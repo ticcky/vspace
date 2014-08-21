@@ -117,7 +117,7 @@ class Model:
         #b_val = urand(len(values), proj_dims)
         b_val = []
         for slot in self.slots:
-            curr_b = 0.0
+            curr_b = -2.5 * (len(self.ontology[slot]) / 2)
             for val in self.ontology[slot]:
                 b_val.append(curr_b)
                 curr_b += 2.5
