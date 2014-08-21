@@ -114,7 +114,14 @@ class Model:
         P_val = urand(len(slots), lat_dims, proj_dims)
         self.P = theano.shared(value=P_val, name="P")
 
-        b_val = urand(len(values), proj_dims)
+        #b_val = urand(len(values), proj_dims)
+        b_val = []
+        for slot in self.slots:
+            curr_b = 0.0
+            for val in self.ontology[slot]:
+                curr_b += 2.5
+                b_val.append(curr_b)
+        b_val = np.array(b_val).astype(floatx)
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
@@ -127,7 +134,7 @@ class Model:
         self.f_proj_curr = function([state, slot], proj)
 
     def get_params(self):
-        return [self.U, self.u, self.P, self.b]
+        return [self.U, self.u, self.P] #, self.b]
 
 
 class VSpace1:
