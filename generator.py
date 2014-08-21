@@ -39,10 +39,13 @@ class DialogGenerator:
         'time': ['tm_null', '1', '2', '3'],
     }"""
 
+    nvals_per_slot = 6
     ontology = {}
     for slot in ['from', 'to', 'time']:
         ontology[slot] = []
-        for val_ndx in range({'from': 5, 'to': 5, 'time': 5}[slot]):
+        for val_ndx in range({'from': nvals_per_slot, 'to': nvals_per_slot,
+                              'time': nvals_per_slot}[
+            slot]):
             ontology[slot].append("%s_%d" % (slot, val_ndx, ))
 
     def __init__(self, really_random=False):
