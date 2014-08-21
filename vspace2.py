@@ -434,7 +434,7 @@ class VSpace1:
 
         t_ontology = np.zeros((len(slots), max(len(x) for x in
                                                self.gen.ontology)))
-        for slot, values in self.gen.ontology:
+        for slot, values in self.gen.ontology.iteritems():
             for i, val in enumerate(values):
                 print slots[slot], i, val
                 t_ontology[slots[slot]][i] = values[val]
