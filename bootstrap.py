@@ -45,6 +45,9 @@ def from_confusion_tables(cts):
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
     for row_id in range(n_rows):
         for col_id in range(n_cols):
-            res_ct[row_id, col_id] = "%.2f (+-%.2f)" % (mean_ct[row_id, col_id], stddev_ct[row_id, col_id])
+            if mean_ct[row_id, col_id] > 0.0:
+                res_ct[row_id, col_id] = "%.2f (+-%.2f)" % (mean_ct[row_id, col_id], stddev_ct[row_id, col_id])
+            else:
+                res_ct[row_id, col_id] = ""
 
     return ConfusionTable(res_ct, values)
