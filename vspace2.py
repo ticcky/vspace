@@ -267,20 +267,22 @@ class VSpace1:
         def loss_fn_all(proj, state, data, weight, b, data_cnt, ontology):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
-                loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                #continue
 
                 for val in random.sample(self.gen.ontology[slot], 5):
                     val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
-                    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
-                                                               data[slot_ndx])
+                    loss += T.eq(data[slot_ndx], val_ndx) * score
+                    loss += T.neq(data[slot_ndx], val_ndx) * \
+                            T.nnet.softplus(1 - score)
 
-            return weight * loss
+            return loss * weight
 
         t_labels = T.imatrix(name="t_labels")
         t_ontology = T.imatrix(name="t_ontology")
         t_weights = T.vector(name="t_weights")
-        losses, updates = theano.scan(loss_fn, #_all,
+        losses, updates = theano.scan(loss_fn_all,
                                       sequences=[states_projectionx,
                                                  states,
                                                  t_labels,
