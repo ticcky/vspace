@@ -121,10 +121,9 @@ class Model:
         for slot in self.slots:
             curr_b = -2.5 * (len(self.ontology[slot]) / 2)
             for val in self.ontology[slot]:
-                b_val.append(curr_b)
+                b_val.append([curr_b])
                 curr_b += 2.5
         b_val = np.array(b_val).astype(floatx)
-        print b_val.shape
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
