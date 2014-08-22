@@ -408,7 +408,7 @@ class VSpace1:
             dataset = self.training_dialogs
 
             tracker = Tracker(self.model, inv=False)
-            tracker.simulate(dataset, self.training_weights)
+            tracker.simulate(dataset)
             cts.append(tracker.out_data['confusion_tables'])
 
         ct = bootstrap.from_all_confusion_tables(cts)
