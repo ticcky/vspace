@@ -142,7 +142,7 @@ class Model:
 class VSpace1:
     dialog_cnt = 100
     lat_dims = 10
-    proj_dims = 2
+    proj_dims = 3
     learning_rate = 0.1
     rprop_plus = 1.4
     rprop_minus = 0.5
@@ -218,10 +218,10 @@ class VSpace1:
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
-
-                score = -T.log(((proj[slot_ndx] - b[ontology[
-                    slot_ndx]])**2).mean())
-                score += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
+                #score = -T.log(score_vec.mean())
+                score = T.nnet.softplus(((proj[slot_ndx] - b[data[
+                    slot_ndx]])**2).sum() - 0.1)
                 #score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
                 #    slot_ndx]])
                 #    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
