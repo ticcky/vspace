@@ -124,7 +124,7 @@ class Model:
                 b_val.append(curr_b)
                 curr_b += 2.5
         b_val = np.array(b_val).astype(floatx)
-        print len(b_val)
+        print b_val.shape
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
