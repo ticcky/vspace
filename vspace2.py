@@ -144,7 +144,7 @@ class VSpace1:
     dialog_cnt = 100
     lat_dims = 10
     proj_dims = 1
-    learning_rate = 1.0
+    learning_rate = 0.1
     rprop_plus = 1.4
     rprop_minus = 0.5
 
@@ -270,7 +270,7 @@ class VSpace1:
                 #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
                 #continue
 
-                for val in random.sample(self.gen.ontology[slot], 5):
+                for val in self.gen.ontology[slot]:
                     val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
                     loss += T.eq(data[slot_ndx], val_ndx) * score
