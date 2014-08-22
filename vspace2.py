@@ -217,11 +217,11 @@ class VSpace1:
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
-                #score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
-                score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
-                    slot_ndx]])
-                    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
-                                        0.1)
+                score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                #score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
+                #    slot_ndx]])
+                #    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
+                #                        0.1)
                 #**2).sum()
                 #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
                 loss += score  #T.log(1 + score)  #T.tanh(score)
