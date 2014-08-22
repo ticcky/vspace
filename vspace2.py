@@ -123,7 +123,7 @@ class Model:
             for val in self.ontology[slot]:
                 b_val.append(curr_b)
                 curr_b += 2.5
-        b_val = np.array(b_val).astype(floatx)
+        b_val = np.array([b_val]).astype(floatx)
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
