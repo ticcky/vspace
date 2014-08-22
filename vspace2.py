@@ -123,7 +123,8 @@ class Model:
             for val in self.ontology[slot]:
                 b_val.append(curr_b)
                 curr_b += 2.5
-        b_val = np.array([b_val]).astype(floatx)
+        b_val = np.array(b_val).astype(floatx)
+        print len(b_val)
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
@@ -474,7 +475,7 @@ class VSpace1:
                                                self.gen.ontology.values())))
         for slot, vals in self.gen.ontology.iteritems():
             for i, val in enumerate(vals):
-                print slots[slot], i, val, values[val]
+                #print slots[slot], i, val, values[val]
                 t_ontology[slots[slot]][i] = values[val]
 
         self.training_ontology = np.asarray(t_ontology, dtype=np.int32)
