@@ -116,14 +116,14 @@ class Model:
         P_val = urand(len(slots), lat_dims, proj_dims)
         self.P = theano.shared(value=P_val, name="P")
 
-        b_val = urand(len(values), proj_dims)
-        """b_val = []
+        #b_val = urand(len(values), proj_dims)
+        b_val = []
         for slot in self.slots:
             curr_b = -2.5 * (len(self.ontology[slot]) / 2)
             for val in self.ontology[slot]:
                 b_val.append(curr_b)
                 curr_b += 2.5
-        b_val = np.array(b_val).astype(floatx)"""
+        b_val = np.array(b_val).astype(floatx)
         self.b = theano.shared(value = b_val, name="b")
 
         a = T.iscalar(name="a")
@@ -142,7 +142,7 @@ class Model:
 class VSpace1:
     dialog_cnt = 100
     lat_dims = 10
-    proj_dims = 3
+    proj_dims = 1
     learning_rate = 0.1
     rprop_plus = 1.4
     rprop_minus = 0.5
