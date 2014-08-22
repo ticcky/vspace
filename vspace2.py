@@ -132,8 +132,9 @@ class Model:
         self.f_s_new = function([state, a], state_new)
 
         slot = T.iscalar(name="slot")
-        proj = self.proj_fn(slot, state, self.P)
-        self.f_proj_curr = function([state, slot, self.P], proj)
+        P_arg = T.tensor3()
+        proj = self.proj_fn(slot, state, P_arg)
+        self.f_proj_curr = function([state, slot, P_arg], proj)
 
     def get_params(self):
         return [self.U, self.u, self.P, self.b]
