@@ -132,7 +132,7 @@ class Model:
         self.f_proj_curr = function([state, slot], proj)
 
     def get_params(self):
-        return [self.U, self.u, self.P] #, self.b]
+        return [self.U, self.u, self.P, self.b]
 
 
 class VSpace1:
