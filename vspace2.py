@@ -269,7 +269,7 @@ class VSpace1:
             for slot, slot_ndx in self.model.slots.iteritems():
                 loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
 
-                for val, val_ndx in self.model.ontology.iteritems():
+                for val, val_ndx in self.model.ontology[slot].iteritems():
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
                     loss += T.nnet.softplus(1 - score)
 
