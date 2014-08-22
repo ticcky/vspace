@@ -214,7 +214,7 @@ class VSpace1:
         #import ipdb; ipdb.set_trace()
         self.model.decode_type = self.model.DECODE_DOT
         def loss_fn(proj, data, weight, b, data_cnt, ontology):
-            loss = -proj.sum()
+            loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
                 #score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
@@ -222,7 +222,7 @@ class VSpace1:
                     / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2)))
                 #**2).sum()
                 #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
-                loss += score  #T.log(1 + score)  #T.tanh(score)
+                loss += T.log(1.0 + score)  #T.log(1 + score)  #T.tanh(score)
 
                 """
                 score = ((proj[slot_ndx] - b[
