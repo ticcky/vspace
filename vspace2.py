@@ -214,21 +214,27 @@ class VSpace1:
         #import ipdb; ipdb.set_trace()
         #self.model.decode_type = self.model.DECODE_DOT
         self.model.decode_type = self.model.DECODE_SUB
-        def loss_fn(proj, data, weight, b, data_cnt, ontology):
+        def loss_fn(proj, state, data, weight, b, data_cnt, ontology):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
+                true_proj = b[data[slot_ndx]]
+                proj = T.tensordot(true_proj, self.model.P[slot_ndx],
+                                 [[0], [1]])
+                loss += ((state - proj)**2).sum()
                 # Loss for not getting right the correct slot.
                 #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
                 #score = -T.log(score_vec.mean())
-                score = T.nnet.softplus(((proj[slot_ndx] - b[data[
-                    slot_ndx]])**2).sum() - 0.1)
+                #score = T.nnet.softplus(((proj[slot_ndx] - b[data[
+                #    slot_ndx]])**2).sum() - 0.1)
                 #score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
                 #    slot_ndx]])
                 #    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
                 #                        0.1)
                 #**2).sum()
                 #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
-                loss += score  #T.log(1 + score)  #T.tanh(score)
+                #loss += score  #T.log(1 + score)  #T.tanh(score)
+
+
 
                 """
                 score = ((proj[slot_ndx] - b[
@@ -257,6 +263,7 @@ class VSpace1:
         t_weights = T.vector(name="t_weights")
         losses, updates = theano.scan(loss_fn,
                                       sequences=[states_projectionx,
+                                                 states,
                                                  t_labels,
                                                  t_weights],
                                       #states_projectionx,
