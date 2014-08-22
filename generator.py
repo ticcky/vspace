@@ -39,7 +39,7 @@ class DialogGenerator:
         'time': ['tm_null', '1', '2', '3'],
     }"""
 
-    nvals_per_slot = 20
+    nvals_per_slot = 10
     ontology = {}
     for slot in ['from', 'to', 'time']:
         ontology[slot] = []
