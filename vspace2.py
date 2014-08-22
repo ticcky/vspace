@@ -269,13 +269,13 @@ class VSpace1:
             for slot, slot_ndx in self.model.slots.iteritems():
                 #loss += ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
                 #continue
-
+                n_vals = len(self.gen.ontology[slot])
                 for val in self.gen.ontology[slot]:
                     val_ndx = self.model.values[val]
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
-                    loss += T.eq(data[slot_ndx], val_ndx) * score
+                    loss += T.eq(data[slot_ndx], val_ndx) * score / n_vals
                     loss += T.neq(data[slot_ndx], val_ndx) * \
-                            T.nnet.softplus(1 - score)
+                            T.nnet.softplus(1 - score) / n_vals
 
             return loss * weight
 
