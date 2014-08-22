@@ -217,45 +217,50 @@ class VSpace1:
         self.model.decode_type = self.model.DECODE_SUB
         def loss_fn(proj, state, data, weight, b, data_cnt, ontology):
             loss = 0.0
+            total_state = None
             for slot, slot_ndx in self.model.slots.iteritems():
                 true_proj = b[data[slot_ndx]]
                 proj = T.tensordot(true_proj, self.model.P[slot_ndx],
                                  [[0], [1]])
-                loss += ((state - proj)**2).sum()
-                # Loss for not getting right the correct slot.
-                #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
-                #score = -T.log(score_vec.mean())
-                #score = T.nnet.softplus(((proj[slot_ndx] - b[data[
-                #    slot_ndx]])**2).sum() - 0.1)
-                #score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
-                #    slot_ndx]])
-                #    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
-                #                        0.1)
-                #**2).sum()
-                #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
-                #loss += score  #T.log(1 + score)  #T.tanh(score)
+                if total_state is None:
+                    total_state = proj
+                else:
+                    total_state += proj
+            loss += ((state - total_state)**2).sum()
+            # Loss for not getting right the correct slot.
+            #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
+            #score = -T.log(score_vec.mean())
+            #score = T.nnet.softplus(((proj[slot_ndx] - b[data[
+            #    slot_ndx]])**2).sum() - 0.1)
+            #score = T.nnet.softplus(abs(T.dot(proj[slot_ndx], b[data[
+            #    slot_ndx]])
+            #    / (proj[slot_ndx].norm(2) * b[data[slot_ndx]].norm(2))) -
+            #                        0.1)
+            #**2).sum()
+            #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
+            #loss += score  #T.log(1 + score)  #T.tanh(score)
 
 
 
-                """
-                score = ((proj[slot_ndx] - b[
-                    T.max([data[slot_ndx] - 1, 0])
-                ])**2).sum()
-                loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx], 0)
+            """
+            score = ((proj[slot_ndx] - b[
+                T.max([data[slot_ndx] - 1, 0])
+            ])**2).sum()
+            loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx], 0)
 
-                max_v = len(self.model.values) - 1
-                score = ((proj[slot_ndx] - b[
-                    T.min([data[slot_ndx] + 1, max_v])
-                ])**2).sum()
-                loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx],
-                                                           max_v)
-                """
-                # Loss for giving credit to randomly selected others.
-                #for val in random.sample(self.gen.ontology[slot], 20):
-                #    val_ndx = self.model.values[val]
-                #    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
-                #    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
-                #                                               data[slot_ndx])
+            max_v = len(self.model.values) - 1
+            score = ((proj[slot_ndx] - b[
+                T.min([data[slot_ndx] + 1, max_v])
+            ])**2).sum()
+            loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx],
+                                                       max_v)
+            """
+            # Loss for giving credit to randomly selected others.
+            #for val in random.sample(self.gen.ontology[slot], 20):
+            #    val_ndx = self.model.values[val]
+            #    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
+            #    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
+            #                                               data[slot_ndx])
 
             return loss * weight
 
