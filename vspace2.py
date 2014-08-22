@@ -393,9 +393,6 @@ class VSpace1:
         #import ipdb; ipdb.set_trace()
 
     def visualize(self, out_filename="out/training_bs.html"):
-        tracker = Tracker(self.model)
-        tracker.simulate(self.training_dialogs)
-
         # Do bootstrap for the confusion table.
         n_bs = 1
         widgets = [progressbar.Percentage(),
