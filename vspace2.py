@@ -138,7 +138,7 @@ class Model:
 class VSpace1:
     dialog_cnt = 100
     lat_dims = 10
-    proj_dims = 1
+    proj_dims = 2
     learning_rate = 0.1
     rprop_plus = 1.4
     rprop_minus = 0.5
