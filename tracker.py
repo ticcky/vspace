@@ -88,7 +88,6 @@ class Tracker:
             for val in self.model.ontology[slot]:
                 val_ndx = self.model.values[val]
                 val_vector = self.model.b.get_value()[val_ndx]
-                import ipdb; ipdb.set_trace()
 
                 if self.model.decode_type == self.model.DECODE_SUB:
                     scores[val] = np.linalg.norm(val_vector - proj_vector, 2)
