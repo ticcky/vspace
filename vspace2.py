@@ -244,7 +244,7 @@ class VSpace1:
                 #    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
                 #                                               data[slot_ndx])
 
-            return loss #* weight
+            return loss * weight
 
         t_labels = T.imatrix(name="t_labels")
         t_ontology = T.imatrix(name="t_ontology")
