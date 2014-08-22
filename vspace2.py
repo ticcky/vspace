@@ -221,7 +221,7 @@ class VSpace1:
                 true_proj = b[data[slot_ndx]]
                 print true_proj
                 proj = T.tensordot(true_proj, self.model.P[slot_ndx],
-                                 [[0], [1]])
+                                 [[0], [0]])
                 loss += ((state - proj)**2).sum()
                 # Loss for not getting right the correct slot.
                 #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
