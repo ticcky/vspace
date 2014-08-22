@@ -212,7 +212,8 @@ class VSpace1:
         #        -self.model.b_value.dimshuffle('x', 0, 1))
         # Udelat pro kazdy slot jiny.
         #import ipdb; ipdb.set_trace()
-        self.model.decode_type = self.model.DECODE_DOT
+        #self.model.decode_type = self.model.DECODE_DOT
+        self.model.decode_type = self.model.DECODE_SUB
         def loss_fn(proj, data, weight, b, data_cnt, ontology):
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
