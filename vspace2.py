@@ -213,8 +213,9 @@ class VSpace1:
             for slot, slot_ndx in self.model.slots.iteritems():
                 # Loss for not getting right the correct slot.
                 score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
-                loss += score #T.tanh(score)
+                loss += T.log(1.0 / (1 + score))  #T.tanh(score)
 
+                """
                 score = ((proj[slot_ndx] - b[
                     T.max([data[slot_ndx] - 1, 0])
                 ])**2).sum()
@@ -226,7 +227,7 @@ class VSpace1:
                 ])**2).sum()
                 loss += T.nnet.softplus(1 - score) * T.neq(data[slot_ndx],
                                                            max_v)
-
+                """
                 # Loss for giving credit to randomly selected others.
                 #for val in random.sample(self.gen.ontology[slot], 20):
                 #    val_ndx = self.model.values[val]
