@@ -92,9 +92,10 @@ class Tracker:
                 if self.model.decode_type == self.model.DECODE_SUB:
                     scores[val] = np.linalg.norm(val_vector - proj_vector, 2)
                 elif self.model.decode_type == self.model.DECODE_DOT:
-                    scores[val] = np.dot(val_vector, proj_vector) / \
+                    scores[val] = abs(np.dot(val_vector, proj_vector) / \
                                   np.linalg.norm(val_vector,
-                                                 2) * np.linalg.norm(proj_vector, 2)
+                                                 2) * np.linalg.norm(
+                        proj_vector, 2))
                 else:
                     raise Exception('Unknown model decoder.')
 
