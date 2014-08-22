@@ -124,7 +124,7 @@ class Model:
                 b_val.append([curr_b])
                 curr_b += 2.5
         b_val = np.array(b_val).astype(floatx)
-        self.b = theano.shared(value = b_val, name="b")
+        self.b = theano.shared(value=b_val, name="b")
 
         a = T.iscalar(name="a")
         state = T.vector(name="state")
@@ -133,7 +133,7 @@ class Model:
 
         slot = T.iscalar(name="slot")
         proj = self.proj_fn(slot, state, self.P)
-        self.f_proj_curr = function([state, slot], proj)
+        self.f_proj_curr = function([state, slot, self.P], proj)
 
     def get_params(self):
         return [self.U, self.u, self.P, self.b]
@@ -392,7 +392,7 @@ class VSpace1:
             else:
                 dataset = self.training_dialogs
 
-            tracker = Tracker(self.model)
+            tracker = Tracker(self.model, inv=True)
             tracker.simulate(dataset)
             cts.append(tracker.out_data['confusion_tables'])
 

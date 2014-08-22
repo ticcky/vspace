@@ -53,10 +53,21 @@ class BasicTracker:
 
 
 class Tracker:
-    def __init__(self, model):
+    def __init__(self, model, inv=False):
         self.model = model
         self.true_state = None
         self.state = None
+
+        # Invert projection matrix if needed.
+        if inv:
+            P_inv = []
+            for P_slot in self.model.P.get_value():
+                P_inv.append(np.linalg.pinv(P_slot))
+
+            self.P = P_inv
+
+        else:
+            self.P = self.model.P.get_value()
 
     def get_state(self): return self.state
 
@@ -82,7 +93,7 @@ class Tracker:
         for slot in self.model.slots:
             slot_ndx = self.model.slots[slot]
 
-            proj_vector = self.model.f_proj_curr(self.state, slot_ndx)
+            proj_vector = self.model.f_proj_curr(self.state, slot_ndx, self.P)
 
             scores = {}
             for val in self.model.ontology[slot]:
