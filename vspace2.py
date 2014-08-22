@@ -280,7 +280,7 @@ class VSpace1:
         t_labels = T.imatrix(name="t_labels")
         t_ontology = T.imatrix(name="t_ontology")
         t_weights = T.vector(name="t_weights")
-        losses, updates = theano.scan(loss_fn_all,
+        losses, updates = theano.scan(loss_fn, #_all,
                                       sequences=[states_projectionx,
                                                  states,
                                                  t_labels,
