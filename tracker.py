@@ -65,6 +65,7 @@ class Tracker:
                 P_inv.append(np.linalg.pinv(P_slot))
 
             self.P = P_inv
+            import ipdb; ipdb.set_trace()
 
         else:
             self.P = self.model.P.get_value()
