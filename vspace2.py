@@ -224,7 +224,7 @@ class VSpace1:
                                         0.1)
                 #**2).sum()
                 #loss += -T.log(1.0 / (0.0001 + score))  #T.tanh(score)
-                loss += T.log(1.0 + score)  #T.log(1 + score)  #T.tanh(score)
+                loss += score  #T.log(1 + score)  #T.tanh(score)
 
                 """
                 score = ((proj[slot_ndx] - b[
