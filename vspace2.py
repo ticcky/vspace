@@ -218,8 +218,6 @@ class VSpace1:
             loss = 0.0
             for slot, slot_ndx in self.model.slots.iteritems():
                 true_proj = b[data[slot_ndx]]
-                print true_proj
-                print self.model.P[slot_ndx]
                 proj = T.tensordot(true_proj, self.model.P[slot_ndx],
                                  [[0], [1]])
                 loss += ((state - proj)**2).sum()
