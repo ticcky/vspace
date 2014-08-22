@@ -411,7 +411,7 @@ class VSpace1:
             else:
                 dataset = self.training_dialogs
 
-            tracker = Tracker(self.model, inv=True)
+            tracker = Tracker(self.model, inv=False)
             tracker.simulate(dataset)
             cts.append(tracker.out_data['confusion_tables'])
 
