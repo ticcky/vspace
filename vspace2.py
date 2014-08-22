@@ -407,14 +407,11 @@ class VSpace1:
         cts = []
         for bs_iter in bs_progress(range(n_bs)):
             n_dialogs = len(self.training_dialogs)
-            if n_bs > 1:
-                dataset = [random.choice(self.training_dialogs) for _ in range(
-                    n_dialogs)]
-            else:
-                dataset = self.training_dialogs
+
+            dataset = self.training_dialogs
 
             tracker = Tracker(self.model, inv=False)
-            tracker.simulate(dataset)
+            tracker.simulate(dataset, self.training_weights)
             cts.append(tracker.out_data['confusion_tables'])
 
         ct = bootstrap.from_all_confusion_tables(cts)

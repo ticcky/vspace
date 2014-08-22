@@ -113,7 +113,7 @@ class Tracker:
 
 
 
-    def simulate(self, dialogs):
+    def simulate(self, dialogs, weights):
         self.out_data = {
             'simulation': []
         }
@@ -121,7 +121,7 @@ class Tracker:
         ct_y_true = {slot: [] for slot in self.model.slots}
         ct_y_pred = {slot: [] for slot in self.model.slots}
 
-        for dialog in dialogs:
+        for dialog, weight in zip(dialogs, weights):
             self.new_dialog()
 
             dialog_out = []
@@ -135,9 +135,10 @@ class Tracker:
                         (act, decoded_state))
 
                 # Compute confusion table entry.
-                for slot, y_true, y_pred in decoded_state.iter_confusion_entries():
-                    ct_y_true[slot].append(unicode(y_true))
-                    ct_y_pred[slot].append(unicode(y_pred))
+                if weight > 0.0:
+                    for slot, y_true, y_pred in decoded_state.iter_confusion_entries():
+                        ct_y_true[slot].append(unicode(y_true))
+                        ct_y_pred[slot].append(unicode(y_pred))
 
 
             self.out_data['simulation'].append(dialog_out)
