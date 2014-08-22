@@ -121,7 +121,7 @@ class Tracker:
         ct_y_true = {slot: [] for slot in self.model.slots}
         ct_y_pred = {slot: [] for slot in self.model.slots}
 
-        for dialog in zip(dialogs):
+        for dialog in dialogs:
             self.new_dialog()
 
             dialog_out = []
