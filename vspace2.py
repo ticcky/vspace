@@ -141,7 +141,7 @@ class Model:
 
 
 class VSpace1:
-    dialog_cnt = 100
+    dialog_cnt = 10
     lat_dims = 10
     proj_dims = 1
     learning_rate = 0.1
@@ -517,8 +517,6 @@ if __name__ == '__main__':
 
     def ipdb_invoke():
         import ipdb; ipdb.set_trace()
-
-
 
     vspace.prepare_training()
     vspace.train(ctrl_c_hook=ipdb_invoke)
