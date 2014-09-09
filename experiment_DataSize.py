@@ -8,7 +8,11 @@ from vspace2 import *
 if __name__ == '__main__':
     git_commit()
 
-    os.mkdir("out/experiment_DataSize/")
+    try:
+        os.mkdir("out/experiment_DataSize/")
+    except OSError, e:
+        if not "File exists" in e.message:
+            raise e
 
     for n in [10, 100, 1000]:
         print "> Running with parameters (n=%d)" % n
