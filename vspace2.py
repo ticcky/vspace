@@ -424,6 +424,7 @@ class VSpace1:
         context = {}
         context['tracker'] = tracker.out_data
         context['bootstrap_ct'] = ct
+        context['mean_score'] = np.mean([ctt.mean_score for ctt in ct.values()])
         context['model'] = self.model
         context['training_metrics'] = self.training_metrics
         context['training_data'] = self.training_dialogs
