@@ -15,5 +15,5 @@ if __name__ == '__main__':
 
         vspace = VSpace1(learning_iters=1000)
         vspace.prepare_training()
-        vspace.train(ctrl_c_hook=ipdb_invoke)
+        vspace.train()
         vspace.visualize("out/experiment_DataSize/%d.html" % n)
