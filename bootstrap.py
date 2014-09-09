@@ -27,6 +27,9 @@ def from_confusion_tables(cts):
     mean_ct = np.zeros((n_rows, n_cols))
     stddev_ct = np.zeros((n_rows, n_cols))
 
+    sum_rows = np.zeros((n_rows, ))
+    sum_cols = np.zeros((n_cols, ))
+
     # Compute means.
     #import ipdb; ipdb.set_trace()
     for ct in cts:
@@ -40,13 +43,16 @@ def from_confusion_tables(cts):
         for col_id in range(n_cols):
             #print stddev_ct[row_id, col_id], mean_ct[row_id, col_id], mean_ct[row_id, col_id]**2, stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2
             stddev_ct[row_id, col_id] = np.sqrt(stddev_ct[row_id, col_id] - mean_ct[row_id, col_id]**2)
+            sum_rows[row_id] += mean_ct[row_id, col_id]
+            sum_cols[col_id] += mean_ct[row_id, col_id]
 
     # Synthetize output table.
     res_ct = np.ndarray((n_rows, n_cols), dtype=object)
     for row_id in range(n_rows):
         for col_id in range(n_cols):
             if mean_ct[row_id, col_id] > 0.0:
-                res_ct[row_id, col_id] = "%.2f (+-%.2f)" % (mean_ct[row_id, col_id], stddev_ct[row_id, col_id])
+                #res_ct[row_id, col_id] = "%.2f (+-%.2f)" % (mean_ct[row_id, col_id] , stddev_ct[row_id, col_id])
+                res_ct[row_id, col_id] = "%.2f" % (mean_ct[row_id, col_id] / sum_cols[col_id], )
             else:
                 res_ct[row_id, col_id] = ""
 
