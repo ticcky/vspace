@@ -8,7 +8,7 @@ from vspace2 import *
 if __name__ == '__main__':
     git_commit()
 
-    n_vars_per_slot = 10
+    n_vars_per_slot = 30
     learning_iters = 1000
 
     out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot

@@ -59,6 +59,7 @@ def from_confusion_tables(cts):
                 res_ct[row_id, col_id] = ""
 
             if row_id == col_id:
-                mean_score += mean_ct[row_id, col_id] / sum_cols[col_id] / n_rows
+                if sum_cols[col_id] > 0:
+                    mean_score += mean_ct[row_id, col_id] / sum_cols[col_id] / n_rows
 
     return ConfusionTable(res_ct, values, mean_score)
