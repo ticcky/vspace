@@ -11,7 +11,7 @@ if __name__ == '__main__':
     try:
         os.mkdir("out/experiment_DataSize/")
     except OSError, e:
-        if not "File exists" in e.message:
+        if not "File exists" in e.strerror:
             raise e
 
     for n in [10, 100, 1000]:
