@@ -223,6 +223,7 @@ class VSpace1:
                     score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
                     loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
                                                                data[slot_ndx])
+                    loss += score * T.eq(val_ndx, data[slot_ndx])
                 #true_proj = b[data[slot_ndx]]
                 #proj = T.tensordot(state, self.model.P[slot_ndx],
                 #                 [[0], [1]])
