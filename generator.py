@@ -39,18 +39,19 @@ class DialogGenerator:
         'time': ['tm_null', '1', '2', '3'],
     }"""
 
-    nvals_per_slot = 5
-    ontology = {}
-    for slot in ['from', 'to', 'time']:
-        ontology[slot] = []
-        for val_ndx in range({'from': nvals_per_slot, 'to': nvals_per_slot,
-                              'time': nvals_per_slot}[
-            slot]):
-            ontology[slot].append("%s_%d" % (slot, val_ndx, ))
-
-    def __init__(self, really_random=False):
+    def __init__(self, really_random=False, n_vals_per_slot=5):
         if not really_random:
             random.seed(0)
+
+        ontology = {}
+        for slot in ['from', 'to', 'time']:
+            ontology[slot] = []
+            for val_ndx in range({'from': n_vals_per_slot,
+                                  'to': n_vals_per_slot,
+                                  'time': n_vals_per_slot}[slot]):
+                ontology[slot].append("%s_%d" % (slot, val_ndx, ))
+
+        self.ontology = ontology
 
     def iterate_nulls(self):
         for slot, vals in self.ontology.iteritems():

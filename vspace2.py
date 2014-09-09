@@ -154,12 +154,12 @@ class VSpace1:
     slots = None
     training_metrics = None
 
-    def __init__(self, learning_iters, dialog_cnt=10):
+    def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5):
         self.learning_iters = learning_iters
         self.dialog_cnt = dialog_cnt
 
         # Generate some dialogs and prepare training data.
-        self.gen = DialogGenerator()
+        self.gen = DialogGenerator(n_vals_per_slot=n_vars_per_slot)
         acts, values, slots = self.prepare_data()
 
         # Create new model.
