@@ -17,7 +17,7 @@ if __name__ == '__main__':
     for n in [10, 100, 1000]:
         print "> Running with parameters (n=%d)" % n
 
-        vspace = VSpace1(learning_iters=1000)
+        vspace = VSpace1(learning_iters=1000, dialog_cnt=n)
         vspace.prepare_training()
         vspace.train()
         vspace.visualize("out/experiment_DataSize/%d.html" % n)
