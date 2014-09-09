@@ -217,16 +217,23 @@ class VSpace1:
         self.model.decode_type = self.model.DECODE_SUB
         def loss_fn(proj, state, data, weight, b, data_cnt, ontology):
             loss = 0.0
-            total_state = None
             for slot, slot_ndx in self.model.slots.iteritems():
-                true_proj = b[data[slot_ndx]]
-                proj = T.tensordot(true_proj, self.model.P[slot_ndx],
-                                 [[0], [1]])
-                if total_state is None:
-                    total_state = proj
-                else:
-                    total_state += proj
-            loss += ((state - total_state)**2).sum()
+                for val in self.gen.ontology[slot]:
+                    val_ndx = self.model.values[val]
+                    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
+                    loss += T.nnet.softplus(1 - score) * T.neq(val_ndx,
+                                                               data[slot_ndx])
+                #true_proj = b[data[slot_ndx]]
+                #proj = T.tensordot(state, self.model.P[slot_ndx],
+                #                 [[0], [1]])
+                #loss += ((proj - b[data[slot_ndx]])**2).sum()
+
+
+                #loss += ((state - total_state)**2).sum()
+
+
+            #loss = T.nnet.softplus()
+
             # Loss for not getting right the correct slot.
             #score_vec = (proj[slot_ndx] - b[ontology[slot_ndx]])**2
             #score = -T.log(score_vec.mean())
