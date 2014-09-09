@@ -153,6 +153,6 @@ class Tracker:
             ct[slot] = ConfusionTable(
                     confusion_matrix(ct_y_true[slot], ct_y_pred[slot],
                             vals),
-                    vals)
+                    vals, -1.0)
 
         self.out_data['confusion_tables'] = ct
