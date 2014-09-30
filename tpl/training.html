@@ -18,20 +18,25 @@ th.conft-val {
 {% endblock %}
 
 {% block body %}
+Mean score: {{"%.2f" % mean_score}}
+
 <h3>Confusion tables</h3>
 {% for slot, ct in bootstrap_ct.iteritems() %}
 <table class="table table-bordered">
   <tr>
-    <th class="conft-val">{{slot}}</th>
+    <th class="conft-val">{{slot}} ({{"%.2f" % ct.mean_score}})</th>
     {% for val in ct.values %}
     <td class="conft-val">pred({{val}})</td>
     {% endfor %}
   </tr>
   {% for val, row in zip(ct.values, ct.rows) %}
+    {% set rowloop = loop %}
   <tr>
     <td>true({{val}})</td>
     {% for conf_val in row %}
-    <td>{% if conf_val > 0 %}{{conf_val}}{% endif %}</td>
+    <td class="{% if rowloop.index == loop.index %}danger{% endif %}">{% if
+        conf_val > 0
+        %}{{conf_val}}{% endif %}</td>
     {% endfor %}
   </tr>
   {% endfor %}
@@ -68,6 +73,10 @@ th.conft-val {
 </pre>
 {% endif %}
 {% endfor %}
+
+
+
+
 
 <h3>Losses</h3>
 {{training_metrics.losses}}
@@ -131,4 +140,6 @@ th.conft-val {
   {% endfor %}
 </table>
 {% endfor %}
+
+
 {% endblock %}

@@ -19,7 +19,7 @@ if __name__ == '__main__':
         if not "File exists" in e.strerror:
             raise e
 
-    for n in [10, 100, 1000]:
+    for n in [10, 20, 50, 100, 200, 400, 800, 1600, 3200]:
         print "> Running with parameters (n=%d)" % n
 
         vspace = VSpace1(learning_iters=learning_iters,
