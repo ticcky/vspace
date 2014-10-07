@@ -9,7 +9,7 @@ import os
 from vspace2 import *
 
 
-def run_experiment(n_vars_per_slot, n):
+def run_experiment((n_vars_per_slot, n, )):
     out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot
     try:
         os.mkdir(out_root)
