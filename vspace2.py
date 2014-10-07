@@ -166,7 +166,7 @@ class VSpace1:
         self.model = Model(n_data=len(self.training_labels),
                            lat_dims=self.lat_dims,
                            proj_dims=self.proj_dims,
-                           ontology=self.gen.ontology,
+                           ontologjwy=self.gen.ontology,
                            acts=acts,
                            values=values,
                            slots=slots)
