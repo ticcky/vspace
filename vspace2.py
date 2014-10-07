@@ -441,7 +441,7 @@ class VSpace1:
         with open(out_filename, "w") as f_out:
             f_out.write(tpl.render(**context))
         with open(out_filename_pickle, "w") as f_out:
-            f_out.write(**context)
+            f_out.write(pickle.dumps(context))
 
 
 
