@@ -11,6 +11,11 @@ from vspace2 import *
 
 def run_experiment(n_vars_per_slot, n):
     out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot
+    try:
+        os.mkdir(out_root)
+    except OSError, e:
+        if not "File exists" in e.strerror:
+            raise e
 
     vspace = VSpace1(learning_iters=learning_iters,
                     n_vars_per_slot=n_vars_per_slot,
@@ -26,12 +31,6 @@ if __name__ == '__main__':
 
     learning_iters = 1000
 
-    try:
-        os.mkdir(out_root)
-    except OSError, e:
-        if not "File exists" in e.strerror:
-            raise e
-
     experiment_set = []
     for n_vars_per_slot in [10, 15, 20]:
         for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
@@ -39,3 +38,4 @@ if __name__ == '__main__':
 
     pool = Pool(10)
     pool.map(run_experiment, experiment_set)
+    p.join()
