@@ -406,7 +406,7 @@ class VSpace1:
         #print self.loss_grads[3](self.training_acts, self.training_labels)
         #import ipdb; ipdb.set_trace()
 
-    def visualize(self, out_filename="out/training_bs.html"):
+    def visualize(self, out_filename="out/training_bs.html", out_filename_pickle="out/training_bs.pickle"):
         # Do bootstrap for the confusion table.
         n_bs = 1
         widgets = [progressbar.Percentage(),
@@ -440,6 +440,8 @@ class VSpace1:
         tpl = env.get_template('training.html')
         with open(out_filename, "w") as f_out:
             f_out.write(tpl.render(**context))
+        with open(out_filename_pickle, "w") as f_out:
+            f_out.write(**context)
 
 
 

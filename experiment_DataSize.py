@@ -22,7 +22,8 @@ def run_experiment((n_vars_per_slot, n, )):
                     dialog_cnt=n)
     vspace.prepare_training()
     vspace.train()
-    vspace.visualize(os.path.join(out_root, "%d.html" % n))
+    vspace.visualize(os.path.join(out_root, "%d.html" % n),
+                     os.path.join(out_root, "%d.pickle" % n))
     logger.debug("[n_vars_per_slot=%d,n=%d] Done." % (n_vars_per_slot, n))
 
 
@@ -32,10 +33,10 @@ if __name__ == '__main__':
     learning_iters = 1000
 
     experiment_set = []
-    for n_vars_per_slot in [10, 15, 20]:
+    for n_vars_per_slot in [15, 20, 25, 30]:
         for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
             experiment_set.append((n_vars_per_slot, n, ))
 
     pool = Pool(10)
     pool.map(run_experiment, experiment_set)
-    p.join()
+    pool.join()
