@@ -155,6 +155,10 @@ class VSpace1:
     training_metrics = None
 
     def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5):
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
+        self.logger.debug("Starting.")
         self.learning_iters = learning_iters
         self.dialog_cnt = dialog_cnt
 
@@ -322,7 +326,7 @@ class VSpace1:
         self.grads_rprop = grads_rprop = []
         grads_rprop_new = []
         for param in self.model.get_params():
-            print 'param', param.name
+            self.logger.debug('param %s', param.name)
             shape = param.shape.eval()
             self.shapes.append(shape)
             grad = T.grad(total_loss, wrt=param)
@@ -375,7 +379,7 @@ class VSpace1:
         self.training_metrics['begin'] = time.time()
         self.training_metrics['losses'] = losses = []
 
-        print '>> Training:'
+        self.logger.debug('Starting training.')
         for i in range(self.learning_iters):
             try:
                 loss, grads_U, grads_u, rprop_grads_U, rprop_grads_u = \
@@ -385,7 +389,7 @@ class VSpace1:
                                 self.training_ontology)
 
                 losses.append(loss)
-                print i, "loss:", loss
+                self.logger.debug("%d loss: %.10f", i, loss)
                 #print 'grads U:', rprop_grads_U
                 #print 'grads u:', rprop_grads_u
                 #print
@@ -398,6 +402,7 @@ class VSpace1:
             #print self.model.b.get_value()
 
         self.training_metrics['end'] = time.time()
+        self.logger.debug("Training done.")
         #print self.loss_grads[3](self.training_acts, self.training_labels)
         #import ipdb; ipdb.set_trace()
 
