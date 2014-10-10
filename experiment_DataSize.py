@@ -4,12 +4,22 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from multiprocessing import Pool
+import signal
 import os
 
 from vspace2 import *
 
 
+def signal_handler(signal, frame):
+    print 'You pressed Ctrl+C!'
+    # for p in jobs:
+    #     p.terminate()
+    sys.exit(0)
+
+
 def run_experiment((n_vars_per_slot, n, )):
+    signal.signal(signal.SIGINT, signal_handler)
+
     out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot
     try:
         os.mkdir(out_root)
