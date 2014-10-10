@@ -3,11 +3,11 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+import tempfile
 from multiprocessing import Pool
 import signal
 import os
-
-from vspace2 import *
+import sys
 
 
 def signal_handler(signal, frame):
@@ -17,8 +17,15 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
+def init_worker():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
 def run_experiment((n_vars_per_slot, n, )):
-    signal.signal(signal.SIGINT, signal_handler)
+    tmp_dir = tempfile.mkdtemp(prefix='tmp_vspace_')
+    os.environ['THEANO_FLAGS'] += ",base_compiledir=%s" % tmp_dir
+    from vspace2 import *
+    #signal.signal(signal.SIGINT, signal_handler)
 
     out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot
     try:
@@ -44,7 +51,7 @@ def run_experiment((n_vars_per_slot, n, )):
 if __name__ == '__main__':
     logger.info("Experiment DataSize started.")
 
-    git_commit()
+    #git_commit()
 
     learning_iters = 1000
 
@@ -54,5 +61,12 @@ if __name__ == '__main__':
             experiment_set.append((n_vars_per_slot, n, ))
 
     pool = Pool(1)
-    pool.map(run_experiment, experiment_set)
-    pool.join()
+    try:
+        pool.map_async(run_experiment, experiment_set)
+        pool.close()
+        pool.join()
+
+    except KeyboardInterrupt:
+        print "Caught KeyboardInterrupt, terminating workers"
+        pool.terminate()
+        pool.join()
