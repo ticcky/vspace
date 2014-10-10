@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 import logging
-logging.basicConfig(level=logging.DEBUG)
+import logging.config
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+)
+
 logger = logging.getLogger(__name__)
 
 import tempfile
@@ -62,7 +67,7 @@ if __name__ == '__main__':
 
     pool = Pool(1)
     try:
-        pool.map_async(run_experiment, experiment_set)
+        pool.map_async(run_experiment, experiment_set).get(9999999)
         pool.close()
         pool.join()
 
