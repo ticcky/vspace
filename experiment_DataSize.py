@@ -37,6 +37,6 @@ if __name__ == '__main__':
         for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
             experiment_set.append((n_vars_per_slot, n, ))
 
-    pool = Pool(10)
+    pool = Pool(1)
     pool.map(run_experiment, experiment_set)
     pool.join()
