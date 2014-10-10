@@ -522,6 +522,7 @@ def git_commit():
 
 
 if __name__ == '__main__':
+    logging.info("VSpace Program Started.")
     git_commit()
 
     vspace = VSpace1(learning_iters=10000)
