@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 from multiprocessing import Pool
 import os
@@ -28,6 +26,10 @@ def run_experiment((n_vars_per_slot, n, )):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.info("Experiment DataSize started.")
+
     git_commit()
 
     learning_iters = 1000
