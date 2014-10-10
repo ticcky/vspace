@@ -1,5 +1,8 @@
 # encoding: utf8
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from collections import OrderedDict
 import itertools
 import os
@@ -155,8 +158,6 @@ class VSpace1:
     training_metrics = None
 
     def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5):
-        import logging
-        logging.basicConfig(level=logging.DEBUG)
         self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
         self.logger.debug("Starting.")
         self.learning_iters = learning_iters
