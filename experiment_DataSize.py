@@ -27,7 +27,7 @@ def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
-def run_experiment((n_vars_per_slot, n, )):
+def run_experiment((args, n_vars_per_slot, n, )):
     tmp_dir = tempfile.mkdtemp(prefix='tmp_vspace_')
     os.environ['THEANO_FLAGS'] += ",base_compiledir=%s" % tmp_dir
     from vspace2 import VSpace1
@@ -43,7 +43,7 @@ def run_experiment((n_vars_per_slot, n, )):
     logger.debug("Creating VSpace instance.")
     vspace = VSpace1(learning_iters=learning_iters,
                     n_vars_per_slot=n_vars_per_slot,
-                    dialog_cnt=n)
+                    dialog_cnt=n, init_b=args.init_b)
     logger.debug("Preparing VSpace training.")
     vspace.prepare_training()
     logger.debug("Running VSpace training.")
@@ -59,7 +59,8 @@ if __name__ == '__main__':
 
     argp = argparse.ArgumentParser()
     argp.add_argument('--nworkers', type=int, default=1)
-    argp.add_argument('--debug', type=bool, default=False)
+    argp.add_argument('--debug', action='store_true', default=False)
+    argp.add_argument('--init_b', action='store_true', default=False)
 
     args = argp.parse_args()
 
@@ -71,11 +72,13 @@ if __name__ == '__main__':
     # Prepare all experiments.
     experiment_set = []
     if not args.debug:
+        logger.info("Running full experiment.")
         for n_vars_per_slot in [15, 20, 25, 30]:
             for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
                 experiment_set.append((n_vars_per_slot, n, ))
     else:
-        experiment_set.append((15, 50))
+        logger.info("Running short debug experiment.")
+        experiment_set.append((args, 15, 50))
 
 
     pool = Pool(n_workers)

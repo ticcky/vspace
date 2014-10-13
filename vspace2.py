@@ -92,8 +92,8 @@ class Model:
     def proj_fn(self, slot_ndx, state, P):
         return T.tensordot(P[slot_ndx], state, [[0], [0]])
 
-    def __init__(self, n_data, lat_dims, proj_dims, ontology, acts, slots, \
-                                                            values):
+    def __init__(self, n_data, lat_dims, proj_dims, ontology, acts, slots,
+                 values, init_b):
         # Store parameters in the model.
         self.n_data = n_data
         self.lat_dims = lat_dims
@@ -119,14 +119,16 @@ class Model:
         P_val = urand(len(slots), lat_dims, proj_dims)
         self.P = theano.shared(value=P_val, name="P")
 
-        b_val = urand(len(values), proj_dims)
-        """b_val = []
-        for slot in self.slots:
-            curr_b = -2.5 * (len(self.ontology[slot]) / 2)
-            for val in self.ontology[slot]:
-                b_val.append([curr_b])
-                curr_b += 2.5
-        b_val = np.array(b_val).astype(floatx)"""
+        if not init_b:
+            b_val = urand(len(values), proj_dims)
+        else:
+            b_val = []
+            for slot in self.slots:
+                curr_b = -2.5 * (len(self.ontology[slot]) / 2)
+                for val in self.ontology[slot]:
+                    b_val.append([curr_b])
+                    curr_b += 2.5
+            b_val = np.array(b_val).astype(floatx)
         self.b = theano.shared(value=b_val, name="b")
 
         a = T.iscalar(name="a")
@@ -157,7 +159,8 @@ class VSpace1:
     slots = None
     training_metrics = None
 
-    def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5):
+    def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5,
+                 init_b=False):
         self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
         self.logger.debug("Starting.")
         self.learning_iters = learning_iters
@@ -174,7 +177,8 @@ class VSpace1:
                            ontology=self.gen.ontology,
                            acts=acts,
                            values=values,
-                           slots=slots)
+                           slots=slots,
+                           init_b=init_b)
 
         """s = self.zeros(self.lat_dims)
         for i, a in enumerate(self.training_acts):
