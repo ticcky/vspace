@@ -8,12 +8,13 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+import argparse
 import tempfile
 from multiprocessing import Pool
 import signal
 import os
 import sys
-import argparse
+import traceback
 
 
 def signal_handler(signal, frame):
@@ -27,8 +28,20 @@ def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
-def run_experiment((args, n_vars_per_slot, n, )):
-    tmp_dir = tempfile.mkdtemp(prefix='tmp_vspace_')
+def run_experiment(*args, **kwargs):
+    try:
+        _run_experiment(*args, **kwargs)
+    except Exception, e:
+        logger.error("Process with the following args failed:" + str(args))
+        
+        for ln in traceback.format_exc().split("\n"):
+            logger.error(ln)
+        logger.error("Terminating it.")
+
+
+
+def _run_experiment((args, n_vars_per_slot, n, )):
+    tmp_dir = "/tmp/tmp_vspace_%d" % hash((n_vars_per_slot, n, ))
     os.environ['THEANO_FLAGS'] += ",base_compiledir=%s" % tmp_dir
     from vspace2 import VSpace1
     #signal.signal(signal.SIGINT, signal_handler)
