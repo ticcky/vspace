@@ -1,7 +1,6 @@
 # encoding: utf8
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from collections import OrderedDict
 import itertools
@@ -522,10 +521,18 @@ def git_commit():
 
 
 if __name__ == '__main__':
+    logging_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format=logging_format
+    )
+    logging.root.addHandler(
+        logging.FileHandler('vspace2.log', format=logging_format)
+    )
     logging.info("VSpace Program Started.")
-    git_commit()
+    #git_commit()
 
-    vspace = VSpace1(learning_iters=10000)
+    vspace = VSpace1(learning_iters=2000)
     def save():
         vspace.visualize("out/vspace2.html")
 
