@@ -447,8 +447,8 @@ class VSpace1:
             f_out.write(tpl.render(**context))
         with open(out_filename_pickle, "w") as f_out:
             info = {
-                'mean_score': context['mean_score'],
-                'losses': context['training_metrics']['losses'],
+                'mean_score': float(context['mean_score']),
+                'losses': [float(x) for x in context['training_metrics']['losses']],
                 'simulation': context['tracker']['simulation']
             }
             f_out.write(json.dumps(info))

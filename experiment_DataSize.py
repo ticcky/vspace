@@ -50,7 +50,7 @@ def run_experiment((args, n_vars_per_slot, n, )):
     vspace.train()
     logger.debug("Visualizing.")
     vspace.visualize(os.path.join(out_root, "%d.html" % n),
-                     os.path.join(out_root, "%d.pickle" % n))
+                     os.path.join(out_root, "%d.json" % n))
     logger.debug("[n_vars_per_slot=%d,n=%d] Done." % (n_vars_per_slot, n))
 
 
@@ -73,12 +73,13 @@ if __name__ == '__main__':
     experiment_set = []
     if not args.debug:
         logger.info("Running full experiment.")
+        experiment_set.append((args, 5, 10))
         for n_vars_per_slot in [15, 20, 25, 30]:
             for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
-                experiment_set.append((n_vars_per_slot, n, ))
+                experiment_set.append((args, n_vars_per_slot, n, ))
     else:
         logger.info("Running short debug experiment.")
-        experiment_set.append((args, 15, 50))
+        experiment_set.append((args, 5, 10))
 
 
     pool = Pool(n_workers)
