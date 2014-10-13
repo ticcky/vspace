@@ -6,6 +6,7 @@ from collections import OrderedDict
 import itertools
 import os
 import pickle
+import json
 import random  #; random.seed(0)
 import sys
 import time
@@ -118,14 +119,14 @@ class Model:
         P_val = urand(len(slots), lat_dims, proj_dims)
         self.P = theano.shared(value=P_val, name="P")
 
-        #b_val = urand(len(values), proj_dims)
-        b_val = []
+        b_val = urand(len(values), proj_dims)
+        """b_val = []
         for slot in self.slots:
             curr_b = -2.5 * (len(self.ontology[slot]) / 2)
             for val in self.ontology[slot]:
                 b_val.append([curr_b])
                 curr_b += 2.5
-        b_val = np.array(b_val).astype(floatx)
+        b_val = np.array(b_val).astype(floatx)"""
         self.b = theano.shared(value=b_val, name="b")
 
         a = T.iscalar(name="a")
@@ -441,7 +442,12 @@ class VSpace1:
         with open(out_filename, "w") as f_out:
             f_out.write(tpl.render(**context))
         with open(out_filename_pickle, "w") as f_out:
-            f_out.write(pickle.dumps(context))
+            info = {
+                'mean_score': context['mean_score'],
+                'losses': context['training_metrics']['losses'],
+                'simulation': context['tracker']['simulation']
+            }
+            f_out.write(json.dumps(info))
 
 
 
@@ -526,8 +532,15 @@ if __name__ == '__main__':
         level=logging.DEBUG,
         format=logging_format
     )
+
+    file_logging = logging.FileHandler(
+            'vspace2.log'
+    )
+    file_logging.setFormatter(
+            logging.Formatter(logging_format)
+        )
     logging.root.addHandler(
-        logging.FileHandler('vspace2.log', format=logging_format)
+        file_logging
     )
     logging.info("VSpace Program Started.")
     #git_commit()
