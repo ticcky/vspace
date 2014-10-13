@@ -449,7 +449,7 @@ class VSpace1:
             info = {
                 'mean_score': float(context['mean_score']),
                 'losses': [float(x) for x in context['training_metrics']['losses']],
-                'simulation': context['tracker']['simulation']
+                #'simulation': context['tracker']['simulation']
             }
             f_out.write(json.dumps(info))
 
