@@ -147,8 +147,8 @@ class Model:
 
 class VSpace1:
     dialog_cnt = None
-    lat_dims = 5
-    proj_dims = 1
+    lat_dims = None
+    proj_dims = None
     learning_rate = 0.1
     rprop_plus = 1.4
     rprop_minus = 0.5
@@ -160,11 +160,13 @@ class VSpace1:
     training_metrics = None
 
     def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5,
-                 init_b=False):
+                 init_b=False, lat_dims=5, proj_dims=1):
         self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
         self.logger.debug("Starting.")
         self.learning_iters = learning_iters
         self.dialog_cnt = dialog_cnt
+        self.proj_dims = proj_dims
+        self.lat_dims = lat_dims
 
         # Generate some dialogs and prepare training data.
         self.gen = DialogGenerator(n_vals_per_slot=n_vars_per_slot)

@@ -54,9 +54,14 @@ def _run_experiment((args, n_vars_per_slot, n, )):
             raise e
 
     logger.debug("Creating VSpace instance.")
-    vspace = VSpace1(learning_iters=learning_iters,
-                    n_vars_per_slot=n_vars_per_slot,
-                    dialog_cnt=n, init_b=args.init_b)
+    vspace = VSpace1(
+        learning_iters=learning_iters,
+        n_vars_per_slot=n_vars_per_slot,
+        dialog_cnt=n,
+        init_b=args.init_b,
+        lat_dims=args.ndims_lat,
+        proj_dims=args.ndims_proj
+    )
     logger.debug("Preparing VSpace training.")
     vspace.prepare_training()
     logger.debug("Running VSpace training.")
@@ -74,13 +79,15 @@ if __name__ == '__main__':
     argp.add_argument('--nworkers', type=int, default=1)
     argp.add_argument('--debug', action='store_true', default=False)
     argp.add_argument('--init_b', action='store_true', default=False)
+    argp.add_argument('--ndims_lat', type=int, default=5)
+    argp.add_argument('--ndims_proj', type=int, default=1)
 
     args = argp.parse_args()
 
     #git_commit()
     n_workers = args.nworkers
 
-    learning_iters = 1000
+    learning_iters = 2000
 
     # Prepare all experiments.
     experiment_set = []
