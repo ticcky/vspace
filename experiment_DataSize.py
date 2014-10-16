@@ -41,14 +41,14 @@ def run_experiment(*args, **kwargs):
 
 
 def _run_experiment((args, n_vars_per_slot, n, )):
-    tmp_dir = "/tmp/tmp_vspace_%d" % hash((n_vars_per_slot, n, ))
+    tmp_dir = "/tmp/tmp_vspace_%d" % os.getpid()  #hash((n_vars_per_slot, n, ))
     os.environ['THEANO_FLAGS'] += ",base_compiledir=%s" % tmp_dir
     from vspace2 import VSpace1
     #signal.signal(signal.SIGINT, signal_handler)
 
-    out_root = "out/experiment_DataSize_slotvals=%d/" % n_vars_per_slot
+    out_root = "/ha/work/people/zilka/out%s/experiment_DataSize_slotvals=%d/" % (args.out_tag, n_vars_per_slot)
     try:
-        os.mkdir(out_root)
+        os.makedirs(out_root)
     except OSError, e:
         if not "File exists" in e.strerror:
             raise e
@@ -81,20 +81,22 @@ if __name__ == '__main__':
     argp.add_argument('--init_b', action='store_true', default=False)
     argp.add_argument('--ndims_lat', type=int, default=5)
     argp.add_argument('--ndims_proj', type=int, default=1)
+    argp.add_argument('--out_tag', default='')
 
     args = argp.parse_args()
 
     #git_commit()
     n_workers = args.nworkers
 
-    learning_iters = 2000
+    learning_iters = 500
 
     # Prepare all experiments.
     experiment_set = []
     if not args.debug:
         logger.info("Running full experiment.")
-        experiment_set.append((args, 5, 10))
-        for n_vars_per_slot in [15, 20, 25, 30]:
+        #experiment_set.append((args, 5, 10))
+        #for n_vars_per_slot in [15, 20, 25, 30]:
+        for n_vars_per_slot in [5, 7, 9, 11, 13]:
             for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
                 experiment_set.append((args, n_vars_per_slot, n, ))
     else:
@@ -104,7 +106,7 @@ if __name__ == '__main__':
 
     pool = Pool(n_workers)
     try:
-        pool.map_async(run_experiment, experiment_set).get(9999999)
+        pool.map(run_experiment, experiment_set)
         pool.close()
         pool.join()
 
