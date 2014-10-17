@@ -17,6 +17,11 @@ def main():
     base_dir = sys.argv[1]
     for exp in os.listdir(base_dir):
         dir_name = os.path.join(base_dir, exp)
+
+        # Only directories are considered to be experiments.
+        if not os.path.isdir(dir_name):
+            continue
+
         exp_val = exp
         print ">", dir_name
 
