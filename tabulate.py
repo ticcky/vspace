@@ -38,11 +38,27 @@ def main():
 
     categories = set(out_table[:, 0])
 
+    plts = []
+    labels = []
+    plt_num = 1
     for category in sorted(categories):
         vals = out_table[out_table[:,0] == category][:, 1:]
 
-        plt.errorbar(vals[:, 0], vals[:, 1], vals[:, 2])
+        plt.subplot(len(categories), 1, plt_num)
+        plt_num += 1
 
+        plot = plt.errorbar(
+            x=vals[:, 0],
+            y=vals[:, 1],
+            yerr=vals[:, 2],
+            marker='o'
+        )
+        plt.title(str("%d values" % category))
+        plt.ylim(0, 1)
+        #plts.append(plot)
+        #labels.append()
+
+    #plt.legend(plts, labels)
     plt.show()
 
 

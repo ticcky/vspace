@@ -17,7 +17,7 @@ def show_experiment(experiment_name, experiment_param, path):
 
 def main():
     base_dir = sys.argv[1]
-    for exp in os.listdir(base_dir):
+    for exp in sorted(os.listdir(base_dir)):
         dir_name = os.path.join(base_dir, exp)
 
         # Only directories are considered to be experiments.
