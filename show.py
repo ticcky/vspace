@@ -6,11 +6,13 @@ import os
 import sys
 
 
-def show_experiment(experiment_name, path):
+def show_experiment(experiment_name, experiment_param, path):
     with open(path) as f_in:
         data = json.loads(f_in.read())
-    print data['mean_score']
-    #print experiment_name, data['mean_score']
+    #print data['mean_score']
+    print "%s\t%s\t%.4f" % (experiment_name,
+                            experiment_param,
+                            data['mean_score'], )
 
 
 def main():
@@ -23,7 +25,7 @@ def main():
             continue
 
         exp_val = exp
-        print ">", dir_name
+        #print ">", dir_name
 
         for cnt, exp_res in sorted((int(x[:x.index('.')]), x) for x in os.listdir(dir_name)):
             exp_res_val = exp_res
@@ -32,7 +34,8 @@ def main():
 
             if exp_res.endswith('.json'):
                 show_experiment(
-                    exp_val + "-" + exp_res_val,
+                    exp_val.replace('experiment_DataSize_slotvals=', ''),
+                    int(exp_res.rstrip('.json')),
                     os.path.join(dir_name, exp_res)
                 )
 
