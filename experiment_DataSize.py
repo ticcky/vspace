@@ -44,11 +44,16 @@ def run_experiment(*args, **kwargs):
 
 def _run_experiment((args, n_vars_per_slot, n, )):
     tmp_dir = "/tmp/tmp_vspace_%d" % os.getpid()  #hash((n_vars_per_slot, n, ))
-    os.environ['THEANO_FLAGS'] += ",base_compiledir=%s" % tmp_dir
+    os.environ['THEANO_FLAGS'] = "mode=FAST_RUN,device=cpu," \
+                                 "base_compiledir=%s" % tmp_dir
     from vspace2 import VSpace1
     #signal.signal(signal.SIGINT, signal_handler)
+    exp_dir = "n=%d,n_vars_per_slot=%d,init_b=%s,ndims_lat=%d,ndims_proj=%d" \
+              "%s" % (args.init_b, args.ndims_lat, args.ndims_proj,
+                 n_vars_per_slot, n, args.loss)
 
-    out_root = "/ha/work/people/zilka/out%s/experiment_DataSize_slotvals=%d/" % (args.out_tag, n_vars_per_slot)
+    out_root = os.path.join("%s%s" % (args.out_root, args.out_tag, ), exp_dir)
+    # "/ha/work/people/zilka/out%s/experiment_DataSize_slotvals=%d/"
     try:
         os.makedirs(out_root)
     except OSError, e:
@@ -62,7 +67,8 @@ def _run_experiment((args, n_vars_per_slot, n, )):
         dialog_cnt=n,
         init_b=args.init_b,
         lat_dims=args.ndims_lat,
-        proj_dims=args.ndims_proj
+        proj_dims=args.ndims_proj,
+        loss=args.loss
     )
     logger.debug("Preparing VSpace training.")
     vspace.prepare_training()
@@ -79,13 +85,15 @@ if __name__ == '__main__':
 
     argp = argparse.ArgumentParser()
     argp.add_argument('--nworkers', type=int, default=1)
-    argp.add_argument('--debug', action='store_true', default=False)
     argp.add_argument('--init_b', action='store_true', default=False)
     argp.add_argument('--ndims_lat', type=int, default=5)
     argp.add_argument('--ndims_proj', type=int, default=1)
     argp.add_argument('--out_tag', default='')
     argp.add_argument('--vars_per_slot', default='')
     argp.add_argument('--data_sizes', default='')
+    argp.add_argument('--out_root', default='"out%s/experiment_DataSize_slotvals=%d/')
+    argp.add_argument('--loss', default='')
+    argp.add_argument('--debug', action='store_true', default=False)
 
     args = argp.parse_args()
 
@@ -104,14 +112,17 @@ if __name__ == '__main__':
         for n in data_sizes:
             experiment_set.append((args, n_vars_per_slot, n, ))
 
+    if args.debug:
+        logger.warning("Running in debug mode. Only ONE experiment!")
+        _run_experiment(experiment_set.pop())
+    else:
+        pool = Pool(n_workers)
+        try:
+            pool.map_async(run_experiment, experiment_set).get(9999999)
+            pool.close()
+            pool.join()
 
-    pool = Pool(n_workers)
-    try:
-        pool.map_async(run_experiment, experiment_set).get(9999999)
-        pool.close()
-        pool.join()
-
-    except KeyboardInterrupt:
-        print "Caught KeyboardInterrupt, terminating workers"
-        pool.terminate()
-        pool.join()
+        except KeyboardInterrupt:
+            print "Caught KeyboardInterrupt, terminating workers"
+            pool.terminate()
+            pool.join()

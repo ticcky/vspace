@@ -24,6 +24,7 @@ import progressbar
 import theano
 import theano.gradient
 from theano import (function, tensor as T)
+from theano.tensor.shared_randomstreams import RandomStreams
 
 # Project libs.
 import bootstrap
@@ -153,6 +154,8 @@ class VSpace1:
     rprop_plus = 1.4
     rprop_minus = 0.5
 
+    n_negative_samples = 5
+
     learning_iters = None
 
     values = None
@@ -160,13 +163,14 @@ class VSpace1:
     training_metrics = None
 
     def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5,
-                 init_b=False, lat_dims=5, proj_dims=1):
+                 init_b=False, lat_dims=5, proj_dims=1, loss="all"):
         self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
         self.logger.debug("Starting.")
         self.learning_iters = learning_iters
         self.dialog_cnt = dialog_cnt
         self.proj_dims = proj_dims
         self.lat_dims = lat_dims
+        self.loss = loss
 
         # Generate some dialogs and prepare training data.
         self.gen = DialogGenerator(n_vals_per_slot=n_vars_per_slot)
@@ -299,14 +303,47 @@ class VSpace1:
 
             return loss * weight
 
+
+        n_neg_samples = self.n_negative_samples
+        def loss_fn_neg_sampl(proj, state, data, weight, neg_samples, b,
+                              data_cnt, ontology):
+            loss = 0.0
+            for slot, slot_ndx in self.model.slots.iteritems():
+                # Add the positive one.
+                score = ((proj[slot_ndx] - b[data[slot_ndx]])**2).sum()
+                loss += score / (1.0 + n_neg_samples)
+
+                n_vals = len(self.gen.ontology[slot])
+                #rand_vals = [rng.random_integers(low=0, high=n_vals - 1)
+                #             for x in range(n_neg_samples)]
+
+                for val in range(self.n_negative_samples):
+                    val_ndx = neg_samples[slot_ndx * n_neg_samples + val]
+
+                    score = ((proj[slot_ndx] - b[val_ndx])**2).sum()
+                    loss += T.eq(data[slot_ndx], val_ndx) * score / (1 + n_neg_samples)
+                    loss += T.neq(data[slot_ndx], val_ndx) * \
+                            T.nnet.softplus(1 - score) / (1 + n_neg_samples)
+
+            return loss * weight
+
         t_labels = T.imatrix(name="t_labels")
         t_ontology = T.imatrix(name="t_ontology")
         t_weights = T.vector(name="t_weights")
-        losses, updates = theano.scan(loss_fn_all,
+        t_neg_samples = T.imatrix(name="t_neg_samples")
+        if self.loss == "all":
+            train_loss = loss_fn_all
+        elif self.loss == "neg_sampl":
+            train_loss = loss_fn_neg_sampl
+        else:
+            raise Exception("Unknown loss fn: %s" % self.loss)
+
+        losses, updates = theano.scan(train_loss,
                                       sequences=[states_projectionx,
                                                  states,
                                                  t_labels,
-                                                 t_weights],
+                                                 t_weights,
+                                                 t_neg_samples],
                                       #states_projectionx,
                                       #T.as_tensor_variable(
                                       # self.training_labels)],
@@ -361,7 +398,7 @@ class VSpace1:
 
         # Build training function.
         self._train = function(
-            inputs=[t_acts, t_labels, t_weights, t_ontology],
+            inputs=[t_acts, t_labels, t_weights, t_neg_samples, t_ontology],
             outputs=[total_loss, grads[0], grads[1], grads_rprop_new[0],
                      grads_rprop_new[1]],
             updates=[
@@ -393,6 +430,7 @@ class VSpace1:
                     self._train(self.training_acts,
                                 self.training_labels,
                                 self.training_weights,
+                                self.training_neg_samples,
                                 self.training_ontology)
 
                 losses.append(loss)
@@ -487,6 +525,7 @@ class VSpace1:
         training_acts = []
         training_labels = []
         training_weights = []
+        training_neg_samples = []
         for dialog in training_dialogs:
             tracker.new_dialog()
 
@@ -503,15 +542,34 @@ class VSpace1:
                 else:
                     training_weights.append(0.0)
 
+                neg_smpls = []
+                for slot in slots:
+                    neg_smpls.extend([random.randint(
+                        0, len(self.gen.ontology[slot]) - 1) for i in range(
+                        self.n_negative_samples)])
+                training_neg_samples.append(neg_smpls)
+
 
             # Insert reset after each dialog so that the whole training data
             # can be modelled like one sequence.
             training_acts.append(reset_act)
             training_labels.append(blank_state)
+            training_weights.append(0.0)
+            training_neg_samples.append([0] * (self.n_negative_samples *
+                                               len(slots)))
+
+        assert len(training_acts) == len(training_labels) == len(
+            training_weights) == len(training_neg_samples)
+
 
         self.training_acts = np.asarray(training_acts, dtype=np.int32)
         self.training_labels= np.asarray(training_labels, dtype=np.int32)
         self.training_weights = np.asarray(training_weights, dtype=floatx)
+        self.training_neg_samples = np.asarray(training_neg_samples,
+                                               dtype=np.int32)
+
+        #import ipdb; ipdb.set_trace()
+
 
         t_ontology = np.zeros((len(slots), max(len(x) for x in
                                                self.gen.ontology.values())))
