@@ -14,6 +14,8 @@ from multiprocessing import Pool
 import signal
 import os
 import sys
+sys.setrecursionlimit(50000) 
+
 import traceback
 
 
@@ -82,31 +84,30 @@ if __name__ == '__main__':
     argp.add_argument('--ndims_lat', type=int, default=5)
     argp.add_argument('--ndims_proj', type=int, default=1)
     argp.add_argument('--out_tag', default='')
+    argp.add_argument('--vars_per_slot', default='')
+    argp.add_argument('--data_sizes', default='')
 
     args = argp.parse_args()
 
     #git_commit()
     n_workers = args.nworkers
 
-    learning_iters = 500
+    learning_iters = 1000
 
     # Prepare all experiments.
     experiment_set = []
-    if not args.debug:
-        logger.info("Running full experiment.")
-        #experiment_set.append((args, 5, 10))
-        #for n_vars_per_slot in [15, 20, 25, 30]:
-        for n_vars_per_slot in [5, 7, 9, 11, 13]:
-            for n in [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]:
-                experiment_set.append((args, n_vars_per_slot, n, ))
-    else:
-        logger.info("Running short debug experiment.")
-        experiment_set.append((args, 5, 10))
+
+    logger.info("Running full experiment.")
+    vars_per_slot = [int(i) for i in args.vars_per_slot.split(",")]
+    data_sizes = [int(i) for i in args.data_sizes.split(",")]
+    for n_vars_per_slot in vars_per_slot:
+        for n in data_sizes:
+            experiment_set.append((args, n_vars_per_slot, n, ))
 
 
     pool = Pool(n_workers)
     try:
-        pool.map(run_experiment, experiment_set)
+        pool.map_async(run_experiment, experiment_set).get(9999999)
         pool.close()
         pool.join()
 
