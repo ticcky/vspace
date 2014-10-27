@@ -6,17 +6,24 @@ import os
 import sys
 
 
-def show_experiment(experiment_name, experiment_param, path):
+def read_data(path):
     with open(path) as f_in:
         data = json.loads(f_in.read())
-    #print data['mean_score']
-    print "%s\t%s\t%.4f" % (experiment_name,
-                            experiment_param,
-                            data['mean_score'], )
+    return data
 
 
 def main():
-    base_dir = sys.argv[1]
+    import argparse
+
+    argp = argparse.ArgumentParser()
+    argp.add_argument('base_dir')
+    argp.add_argument('--order_by', default='')
+
+    args = argp.parse_args()
+
+    res = []
+
+    base_dir = args.base_dir
     for exp in sorted(os.listdir(base_dir)):
         dir_name = os.path.join(base_dir, exp)
 
@@ -26,18 +33,24 @@ def main():
 
         exp_val = exp
         #print ">", dir_name
+        exp_parsed = {}
+        vars = exp.split(',')
+        for var in vars:
+            name, value = var.split('=')
+            exp_parsed[name] = value
 
-        for cnt, exp_res in sorted((int(x[:x.index('.')]), x) for x in os.listdir(dir_name)):
-            exp_res_val = exp_res
-            if len(exp_res.rstrip('.json')) == 2:
-                exp_res_val = '0' + exp_res.rstrip('.json')
+        for exp_json in os.listdir(dir_name):
+            if '.json' in exp_json:
+                data = read_data(os.path.join(dir_name, exp_json))
+                res.append((exp_parsed, float(data['mean_score'])))
 
-            if exp_res.endswith('.json'):
-                show_experiment(
-                    exp_val.replace('experiment_DataSize_slotvals=', ''),
-                    int(exp_res.rstrip('.json')),
-                    os.path.join(dir_name, exp_res)
-                )
+
+    for data, value in sorted(res,
+                              key=lambda d: (int(d[0]["n_vars_per_slot"]),
+                                             int(d[0]["n"]))
+                              ):
+        #print "%s\t%s" % (json.dumps(data), "%.4f" % value, )
+        print "%s\t%s\t%4f" % (data['n_vars_per_slot'], data['n'], value, )
 
 
 if __name__ == '__main__':

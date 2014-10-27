@@ -20,10 +20,16 @@ def main():
 
     tbl_sum = np.zeros(n_entries)
     tbl_sum2 = np.zeros(n_entries)
+
+
     for tbl in tables:
-        if (tbl[:, 0:1] != tbl_ref[:, 0:1]).any():
-            raise Exception("Something's not good. First cols of tables do not "
-                            "match.")
+        try:
+            if (tbl[:, 0:1] != tbl_ref[:, 0:1]).any():
+                raise Exception("Something's not good. First cols of tables do not "
+                                "match.")
+        except:
+            raise Exception("Error when checking if tables match.")
+
         tbl_sum += tbl[:,2]
         tbl_sum2 += tbl[:,2]**2
 
@@ -41,6 +47,7 @@ def main():
     plts = []
     labels = []
     plt_num = 1
+    res = []
     for category in sorted(categories):
         vals = out_table[out_table[:,0] == category][:, 1:]
 
@@ -55,11 +62,27 @@ def main():
         )
         plt.title(str("%d values" % category))
         plt.ylim(0, 1)
+
+        # Find out where it reaches 95%.
+        passes95 = None
+        for item in vals:
+            if item[1] >= 0.95:
+                passes95 = item[0]
+                break
+
+        try:
+            res.append((passes95 / category, ))
+        except:
+            res.append(None)
+
+
         #plts.append(plot)
         #labels.append()
 
+    print res
+
     #plt.legend(plts, labels)
-    plt.show()
+    #plt.show()
 
 
     #plt.errorbar(out_table[:, 2], y, e, linestyle='None', marker='^')
