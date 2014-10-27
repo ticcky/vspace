@@ -68,7 +68,8 @@ def _run_experiment((args, n_vars_per_slot, n, )):
         init_b=args.init_b,
         lat_dims=args.ndims_lat,
         proj_dims=args.ndims_proj,
-        loss=args.loss
+        loss=args.loss,
+        n_neg_samples=args.n_neg_samples
     )
     logger.debug("Preparing VSpace training.")
     vspace.prepare_training()
@@ -88,6 +89,7 @@ if __name__ == '__main__':
     argp.add_argument('--init_b', action='store_true', default=False)
     argp.add_argument('--ndims_lat', type=int, default=5)
     argp.add_argument('--ndims_proj', type=int, default=1)
+    argp.add_argument('--n_neg_samples', type=int, default=5)
     argp.add_argument('--out_tag', default='')
     argp.add_argument('--vars_per_slot', default='')
     argp.add_argument('--data_sizes', default='')

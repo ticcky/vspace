@@ -162,8 +162,8 @@ class VSpace1:
     slots = None
     training_metrics = None
 
-    def __init__(self, learning_iters, dialog_cnt=10, n_vars_per_slot=5,
-                 init_b=False, lat_dims=5, proj_dims=1, loss="all"):
+    def __init__(self, learning_iters, dialog_cnt, n_vars_per_slot, init_b,
+                 lat_dims, proj_dims, loss, n_neg_samples=5):
         self.logger = logging.getLogger(__name__ + "[n_vars_per_slot=%d,dialog_cnt=%d]" % (n_vars_per_slot, dialog_cnt))
         self.logger.debug("Starting.")
         self.learning_iters = learning_iters
@@ -171,6 +171,7 @@ class VSpace1:
         self.proj_dims = proj_dims
         self.lat_dims = lat_dims
         self.loss = loss
+        self.n_negative_samples = n_neg_samples
 
         # Generate some dialogs and prepare training data.
         self.gen = DialogGenerator(n_vals_per_slot=n_vars_per_slot)
