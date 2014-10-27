@@ -49,8 +49,8 @@ def _run_experiment((args, n_vars_per_slot, n, )):
     from vspace2 import VSpace1
     #signal.signal(signal.SIGINT, signal_handler)
     exp_dir = "n=%d,n_vars_per_slot=%d,init_b=%s,ndims_lat=%d,ndims_proj=%d" \
-              "%s" % (args.init_b, args.ndims_lat, args.ndims_proj,
-                 n_vars_per_slot, n, args.loss)
+              ",loss=%s" % (n, n_vars_per_slot, args.init_b, args.ndims_lat, args.ndims_proj,
+                 args.loss)
 
     out_root = os.path.join("%s%s" % (args.out_root, args.out_tag, ), exp_dir)
     # "/ha/work/people/zilka/out%s/experiment_DataSize_slotvals=%d/"
